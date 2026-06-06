@@ -15,15 +15,27 @@ file, `verse.html`, right here in this folder.
 
 1. Start your local preview the way SETUP.md showed you — in VS Code, that's the "Go Live" button
    (if you used the terminal way, it's already running). Then open
-   `http://localhost:5500/verse.html`.
+   `http://localhost:5500/verse.html`. Your screen should look about like this:
+
+   ![The verse page when it first opens: an input box pre-filled with John 3:16 and a Show verse button](images/on-load.png)
 2. `John 3:16` is already in the box — click "Show verse." The verse appears on your page.
 
-That's **the win**: a user typed a reference, and your page answered. Now poke at it:
+That's **the win**: a user typed a reference, and your page answered.
+
+![John 3:16 shown on the page after clicking Show verse: the reference in bold above the verse text](images/verse-shown.png)
+
+Now poke at it:
 
 - Type a range like `John 3:16-17` — both verses show.
+
+  ![John 3:16 and 3:17 shown as two stacked verses](images/range.png)
 - Type something made-up like `Hesitations 9:99` — you get a friendly "couldn't find that," not a
   crash.
+
+  ![The friendly "Hmm — couldn't find that" message after a made-up reference](images/not-found.png)
 - Stop Concord and try again — you get a calm "is it running?" message instead of a blank page.
+
+  ![The calm "Couldn't reach Concord — is it running?" message when Concord is unreachable](images/concord-unreachable.png)
 
 ## The code, piece by piece
 

@@ -11,3 +11,7 @@ Thumbs.db
 
 # Environment
 .env
+
+# Maintainer screenshot tooling (tools/screenshots) — never commit installed deps
+tools/screenshots/node_modules/
+tools/screenshots/test-results/
