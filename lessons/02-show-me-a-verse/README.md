@@ -13,12 +13,10 @@ file, `verse.html`, right here in this folder.
 
 ## Run it and see it work
 
-1. Make sure Concord is on — visit `http://localhost:8000/healthz`; if counts come back, you're
-   ready.
-2. Start your local preview the way SETUP.md showed you — in VS Code, that's the "Go Live" button
+1. Start your local preview the way SETUP.md showed you — in VS Code, that's the "Go Live" button
    (if you used the terminal way, it's already running). Then open
    `http://localhost:5500/verse.html`.
-3. `John 3:16` is already in the box — click "Show verse." The verse appears on your page.
+2. `John 3:16` is already in the box — click "Show verse." The verse appears on your page.
 
 That's **the win**: a user typed a reference, and your page answered. Now poke at it:
 
