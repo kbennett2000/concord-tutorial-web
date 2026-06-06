@@ -85,4 +85,9 @@ data and put it on a clean page of your own, where the mess disappears.
 
 …read raw Concord data right in your browser.
 
+And here's the quiet proof it's worth it: a real app called
+[songbird](https://github.com/kbennett2000/songbird) already runs on the very endpoints you just
+hit by hand. The calls you made today are the same ones a finished app makes — and you're on your
+way to building one too.
+
 Next up, [Lesson 2](../02-show-me-a-verse/): we take a verse and put it on a page of your own.
