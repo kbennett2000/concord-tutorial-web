@@ -1,5 +1,7 @@
 # Lesson 5 — Drop the pins *(optional — stretch)*
 
+New here? Do the one-time [SETUP.md](../../SETUP.md) first.
+
 > **You can now…** put your data on a map, and understand the tradeoff you made to do it.
 
 **Optional graduation lesson.** Add a map to your capstone: drop pins for the places Concord
@@ -8,4 +10,4 @@ reaches the internet (map tiles come from online) — we'll explain that tradeof
 can finish the course at Lesson 4 and skip this entirely.
 
 🚧 *Lesson content (and `app-map.html`) lands in slice **T5**. For now this is a placeholder; see
-the [course README](../../README.md) for how to run a lesson.*
+[SETUP.md](../../SETUP.md) for how to run a lesson.*
