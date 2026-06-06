@@ -80,6 +80,15 @@ attention and confidence. Default to cut, defer, or link — never pre-load.
 This supersedes any pull toward completeness on entry pages: the front door's job is to
 get hands-on fast, not to brief.
 
+**Working first, explanation second — the win before the why.** A beginner needs to see it
+run before they care how it runs. Never gate the hands-on behind a wall of explanation. A code
+lesson opens by getting the reader to a *running, working result* as fast as possible — start
+the preview, open the page, see it work — and only *then* explains how it works, for the reader
+who's now curious. Reverse the teach-then-do instinct. Structure for code lessons: callback →
+what we're building (a sentence or two) → **get it running and watch it work (the win)** → how
+it works, piece by piece (the reward, not the gate) → the two closers. The reader should be
+looking at a working page on their own screen inside the first minute.
+
 ## The three principles (they drive decisions — see SPEC §1)
 
 - **Commitment & Consistency:** every lesson is numbered and completable; **no lesson ever ends

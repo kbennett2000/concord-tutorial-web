@@ -8,14 +8,29 @@ yours.
 
 ## What we're building
 
-A tiny page with a box to type a reference, a button, and a spot where the verse shows up. One
-file, no setup beyond what you did once in [SETUP.md](../../SETUP.md). The whole thing is in
-`verse.html`, right here in this folder — open it in your editor and follow along.
+A tiny page: a box to type a reference, a button, and the verse appears below. It's all in one
+file, `verse.html`, right here in this folder.
+
+## Run it and see it work
+
+1. Make sure Concord is on — visit `http://localhost:8000/healthz`; if counts come back, you're
+   ready.
+2. Start your local preview the way SETUP.md showed you — in VS Code, that's the "Go Live" button
+   (if you used the terminal way, it's already running). Then open
+   `http://localhost:5500/verse.html`.
+3. `John 3:16` is already in the box — click "Show verse." The verse appears on your page.
+
+That's **the win**: a user typed a reference, and your page answered. Now poke at it:
+
+- Type a range like `John 3:16-17` — both verses show.
+- Type something made-up like `Hesitations 9:99` — you get a friendly "couldn't find that," not a
+  crash.
+- Stop Concord and try again — you get a calm "is it running?" message instead of a blank page.
 
 ## The code, piece by piece
 
-Here's the loop your page runs: **send a request → get JSON back → put it on the page.** Let's
-walk the parts that matter.
+Want to see how it works? Here's the whole loop — open `verse.html` in your editor and follow
+along. The loop your page runs is: **send a request → get JSON back → put it on the page.**
 
 ### Where Concord is
 
@@ -78,19 +93,6 @@ and we answer each one kindly:
 
 That friendly handling is part of the lesson, not an extra — it's what separates a page that
 *works* from one that just works *when you're lucky*.
-
-## Run it
-
-1. Make sure Concord is on — visit `http://localhost:8000/healthz`; counts come back ⇒ ready.
-2. Serve this folder (the one-time setup in [SETUP.md](../../SETUP.md)).
-3. Open `http://localhost:5500/verse.html` in your browser.
-
-## Try it
-
-1. `John 3:16` is already in the box — click **Show verse**. The verse appears.
-2. Type a range like `John 3:16-17` — both verses show.
-3. Type something made-up like `Hesitations 9:99` — you get the friendly "couldn't find that."
-4. Stop Concord and try again — you get the calm "is it running?" message instead of a crash.
 
 ---
 
