@@ -33,6 +33,20 @@ The first of the promised `concord-tutorial-*` series. Proof the surface carries
 - Match Concord's documentation voice (warm, precise, honest about limits) so the two repos feel
   like one family.
 
+**Formatting — break the wall (a scannable page is itself reassurance).** For this
+reader, a page that *looks* easy signals "you can do this"; a dense block signals
+"this is hard." In every README and lesson:
+- Keep paragraphs to 2–4 sentences, with real whitespace between them.
+- Use frequent, plain subheadings so the page scans at a glance.
+- Anything sequential is a numbered list (how-to-run is steps, not a paragraph).
+- Anything you'd type — a URL, a command — goes in a code block, even one line.
+- Set off the prereq check and the how-to-run path as visual callouts (a blockquote
+  or a clearly-bounded block), not buried in prose.
+- **Bold** at most one key phrase per section — the thing that must not be missed.
+- Keep the connective tissue warm and human: short prose between the structure, never
+  an all-bullets checklist and never a gray wall. The goal is "warm, broken into
+  scannable pieces."
+
 ## The three principles (they drive decisions — see SPEC §1)
 
 - **Commitment & Consistency:** every lesson is numbered and completable; **no lesson ever ends
