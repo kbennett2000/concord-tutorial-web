@@ -1,8 +1,13 @@
 # concord-tutorial-web — Build Spec
 
-> Status: design, pre-build. This document is the blueprint cc builds against, one slice
-> per PR (§8). It is written to become `docs/SPEC.md` in the new `concord-tutorial-web`
-> repo. Same spec-first, PR-per-slice discipline as Concord; Kris merges after review.
+> Status: in build. The repo exists; the front door (README, SETUP.md, CLAUDE.md) and Lesson 1
+> have shipped; **T2 is next**. This document is the blueprint cc builds against, one slice per
+> PR (§8); it lives at `docs/SPEC.md` in the repo. Same spec-first, PR-per-slice discipline as
+> Concord; Kris merges after review.
+>
+> **Synced through the T0/T1 front-door slices** (T0a–T0c, T1a): the run instructions now live in
+> `SETUP.md` (§3.1, §4), and four governing rules earned during those rounds are recorded in §5.1
+> (operative verbatim in CLAUDE.md).
 
 ## 0. What this is — and who it's for
 
@@ -47,7 +52,8 @@ shape what gets built, not just how it reads:
     skeleton they must earn.
   - Two freebies (§6): `recipes.md` ("steal these" snippets) and an ideas list ("what could
     you build?"). Seeding use cases is itself a gift.
-  - The prereq box (§3) removes the step-one trap *before* they've invested anything.
+  - The README's Concord-running check (§3.4) removes the step-one trap *before* they've invested
+    anything.
 
 - **Unity / Identity** — shift the reader from "trying Concord" to "I'm a Concord builder."
   - **Builder language from line one**: "the app you're about to build," "your endpoint,"
@@ -171,9 +177,12 @@ Lesson 4 (core) and Lesson 5 (stretch) is deliberate and explained in §2.5.
 - **Acceptance:** three translations render side by side; places render with correct
   per-status display; an `unknown` place shows no coordinates; works with the network off.
 
-### 2.5 Lesson 5 — Capstone (stretch, optional): Drop the pins *(`app-map.html`)*
+### 2.5 Lesson 5 — Capstone (stretch): Drop the pins *(`app-map.html`)*
 
-Flagged **optional** and framed as **graduation**.
+The stretch / graduation lesson — genuinely skippable, but **not advertised as "optional" on the
+front door** (§3.4, §5.1). Skippability is conveyed where it's actionable: in **Lesson 4's closer**
+("you can stop here with a finished app you're proud of") and within this lesson itself — never as
+a front-door caveat that plants doubt before the reader has started.
 
 - **Callback:** "Your app already shows *where* in words. Want to see it on a map? This is the
   step where you go from beginner to builder."
@@ -193,7 +202,8 @@ Flagged **optional** and framed as **graduation**.
   need before.
 - **You can now:** put your data on a map — and you understand the tradeoff you made to do it.
 - **Acceptance:** identified places appear as pins; no-coordinate places are listed, not drawn;
-  the online-tiles tradeoff is stated; the lesson is clearly marked skippable.
+  the online-tiles tradeoff is stated; skippability is conveyed at Lesson 4's closer and within
+  this lesson, not as a front-door label.
 
 ## 3. How a learner runs the lessons — the bulletproof step one
 
@@ -202,16 +212,21 @@ assumed.
 
 ### 3.1 The single blessed path: serve over `http://localhost`
 
-Opening a lesson file by **double-clicking it (`file://`) does not work** — modern browsers
-treat local files as opaque origins, so `fetch()` fails before reaching Concord (MDN's own
-guidance is to run a local server). So there is exactly one recommended path, stated with no
-hedging:
+**These run instructions live in `SETUP.md` at the repo root, not the README** (the front door
+defers to it — see §3.4, §4). They're needed only from Lesson 2 on; Lesson 1 is browser-only.
+The substance below is unchanged — it was relocated, not rewritten.
+
+Opening a lesson file by **double-clicking it (`file://`) does not work** — modern browsers treat
+local files as opaque origins, so `fetch()` fails before reaching Concord (MDN's own guidance is
+to run a local server). So there is exactly one recommended path, stated with no hedging:
 
 1. **VS Code + Live Server (the warm default).** Open the lesson folder in VS Code, install the
    Live Server extension once, click **"Go Live."** The page opens at `http://localhost:5500`
    and auto-reloads on save (editing becomes fun — a small delight worth naming).
-2. **`python3 -m http.server 5500` (no-VS-Code fallback).** Run it from inside the lesson
-   folder, then visit `http://localhost:5500`. Most machines already have Python.
+2. **`python3 -m http.server 5500` (terminal alternative, gated by "already comfortable with a
+   terminal?").** Run it from inside the lesson folder, then visit `http://localhost:5500`. Do
+   **not** claim Python is pre-installed — it isn't reliably (modern macOS/Windows ship without
+   it); give a one-line check (`python3 --version`) and a python.org link if it's absent.
 
 Implementation rule for cc, load-bearing: **every fetch is a plain `fetch(url)` with no custom
 headers.** That keeps it a CORS "simple request," so Concord's existing
@@ -246,31 +261,49 @@ cleanest beginner story. (A grown-up aside can note that real apps centralize th
 strongly steers toward **same-machine + localhost + Live Server** as *the* path; cross-machine
 LAN is a one-line footnote.
 
-### 3.4 The prereq box (the repo README door — reciprocity + commitment, right at the entrance)
+### 3.4 The README front door (trimmed to just-in-time — §5.1)
 
-Before any lesson, the top-level README carries a short "before you start" box that makes step
-one un-failable:
+The README's job is to get the reader hands-on fast, not to brief them. Per §5.1, setup and the
+roadmap are deferred; the page is short. In order:
 
-- **A 30-second "is Concord on?" check:** visit `http://localhost:8000/healthz` — counts come
-  back ⇒ you're ready.
-- **If it isn't running:** point to Concord's existing **Quick start** and **Deployment** docs.
-  We do **not** re-explain install here.
-- **What you need:** a running Concord, a web browser, and either VS Code+Live Server or Python
-  for lessons 2+. Nothing else, no accounts, no npm.
+- The banner.
+- A short, warm welcome (the build-a-real-app / run-it-yourself / you-become-a-builder framing,
+  a few sentences).
+- **"Who this is for"** — the beginners-welcome paragraph and the "already a developer? → Concord's
+  `docs/API.md`" callout. Brief.
+- **The one un-failable check:** a 30-second "is Concord on?" callout — visit
+  `http://localhost:8000/healthz`; counts come back ⇒ ready; if not, link Concord's existing
+  **Quick start**. Do **not** re-explain install.
+- **A single deferred pointer to setup**, e.g. "Lesson 1 needs nothing but your browser; Lesson 2
+  onward needs a quick one-time setup — see `SETUP.md` when you get there." The run instructions
+  themselves live in `SETUP.md` (§3.1), not here.
+- **"Start here"** → Lesson 1 (~2 minutes, nothing installed).
+- **"What's ahead"** *at the end only*, as encouragement — a short prose line (not a table, not a
+  syllabus): a quick verse fetcher, search by meaning, a translation-comparer, and, if you want it,
+  a map. **No lesson is labeled "optional"; no special-casing of Lesson 5; no caveats** on the
+  front door (any "you can stop after Lesson 4" framing belongs in Lesson 4's closer, where it's
+  actionable).
+- The License line.
+
+What the README does **not** carry: the how-to-run section (now `SETUP.md`), a "what you'll need"
+list, an up-front lesson-map table, or any reassurance phrased in words the reader doesn't yet
+know (no "no npm").
 
 ## 4. Repo structure
 
 ```
 concord-tutorial-web/
-├── README.md                     # course intro · audience cleave · prereq box · how-to-run · lesson map
+├── README.md                     # front door: welcome · who-it's-for · the Concord check · SETUP pointer · Start here · what's-ahead (end)
+├── SETUP.md                      # the one-time run instructions (how-to-run), surfaced from Lesson 2 on (§3.1)
 ├── LICENSE                       # MIT © 2026 Kris Bennett (parity with Concord)
 ├── .gitignore
 ├── docs/
+│   ├── SPEC.md                   # this document
 │   └── banner.svg                # committed banner (§7), mirrors Concord's docs/banner.svg
 ├── lessons/
 │   ├── 01-is-it-on/
-│   │   └── README.md             # browser-only lesson, no code file
-│   ├── 02-show-me-a-verse/
+│   │   └── README.md             # browser-only lesson, no code file (no SETUP link — nothing to set up)
+│   ├── 02-show-me-a-verse/       # 02–05 each open with a one-line "do SETUP.md first" pointer
 │   │   ├── README.md
 │   │   └── verse.html
 │   ├── 03-find-by-idea/
@@ -279,7 +312,7 @@ concord-tutorial-web/
 │   ├── 04-compare-and-where/
 │   │   ├── README.md
 │   │   └── app.html
-│   └── 05-drop-the-pins/         # optional / stretch
+│   └── 05-drop-the-pins/         # the stretch/graduation lesson (not advertised "optional" on the front door)
 │       ├── README.md
 │       └── app-map.html
 ├── recipes.md                    # "steal these" snippets (§6)
@@ -287,10 +320,12 @@ concord-tutorial-web/
 ```
 
 - **Lesson text lives in each folder's `README.md`**; the lesson's file(s) sit beside it. Clone
-  once, `cd` into a lesson, read the README, open the file. (Confirm in §9.)
-- **Top-level `README.md`** is the course front door: intro, the light audience-cleave, the
-  prereq box (§3.4), the single how-to-run path (§3.1), and the lesson map. It is *not* API
-  documentation.
+  once, `cd` into a lesson, read the README, open the file.
+- **Top-level `README.md`** is the course front door (§3.4) — welcome, the audience-cleave, the
+  Concord check, a deferred `SETUP.md` pointer, Start here, and a closing what's-ahead. It is
+  *not* API documentation, and it does **not** hold the run instructions (those are `SETUP.md`)
+  or an up-front lesson map.
+- **`SETUP.md`** holds the single blessed run path (§3.1); Lessons 2–5 link to it at the top.
 
 ## 5. Voice & formatting rules (so cc writes every lesson consistently)
 
@@ -305,6 +340,39 @@ concord-tutorial-web/
   (Leaflet via CDN) and flags it as the tradeoff it is.
 - Match Concord's documentation voice (warm, precise, honest about limits) so the two repos feel
   like one family.
+
+### 5.1 The hard-won rules (front-door lessons — operative wording is verbatim in CLAUDE.md)
+
+These four emerged from iterating the front door and now govern *every* page and lesson. They
+share one root cause — writing for a developer by default, and explaining/reassuring before it's
+due — so they're stated together. CLAUDE.md carries the operative wording cc reads each session;
+the reasoning lives here.
+
+- **Break the wall — a scannable page is itself reassurance.** For this reader a page that
+  *looks* easy signals "you can do this"; a dense block signals "this is hard." Short paragraphs
+  (2–4 sentences), frequent plain subheadings, numbered steps for anything sequential, a code
+  block for anything you'd type, callouts for the must-not-miss bits, one bold phrase per
+  section — kept warm, never an all-bullets checklist. (Found when T0's README, though correctly
+  formatted, still read as a wall: the problem was volume and placement, not markup.)
+- **No unexplained jargon — especially the tooling.** The lesson's *topic* (API, endpoint,
+  JSON…) is taught as introduced; the easy thing to forget is the *incidental tooling* the reader
+  is told to touch — VS Code, an extension, a terminal, a command, a language. Gloss each in one
+  plain line + a link on first mention. Never name a scary unknown just to reassure ("no npm"
+  introduces a fear rather than removing one), and never make the reader inventory their own
+  machine ("use whichever you have" → recommend one default, let an "already comfortable with X?"
+  line self-select alternatives).
+- **Just-in-time, not just-in-case.** Everything true is not everything useful — if a sentence
+  isn't helping the reader do the thing in front of them *right now*, it's costing them attention
+  and confidence. Setup, caveats, and concepts appear in the lesson that needs them, not earlier.
+  The roadmap is a destination, not a syllabus: no map of all lessons on entry; a "what's ahead"
+  list, if it earns a place, goes at the *end* as encouragement. Never answer an unasked
+  question — especially a reassurance: naming a fear to soothe it plants the fear ("don't worry,
+  Lesson 5 isn't hard" *creates* the worry). This supersedes any pull toward completeness on entry
+  pages — the front door's job is to get hands-on fast, not to brief.
+- **Motivation is timed, not cut.** Just-in-time defers *instructions and caveats*; it does not
+  delete encouragement. Proof-it's-real and you-could-build-this beats (Unity) land hardest right
+  *after* a win — at a lesson's closer — never as front-door preamble. (Why songbird's "a real app
+  already runs on these endpoints" moved from the README to Lesson 1's closer.)
 
 ## 6. The two freebies (reciprocity, made concrete)
 
@@ -373,7 +441,7 @@ lesson is its own load-bearing unit. The two intentionally-combined slices are f
 | **T2** | **Lesson 2 (verse)** | `lessons/02-show-me-a-verse/` (README + `verse.html`). First real file. | T1 + a running Concord | The fetch→JSON→display loop vs. the real `docs/API.md` shape; **friendly error handling**; base-URL line present; **end-to-end CORS verification gate (§8.1)** |
 | **T3** | **Lesson 3 (search, side by side)** | `lessons/03-find-by-idea/` (README + `search.html`). | T2 | Query params; looping; the meaning-vs-keyword contrast lands |
 | **T4** | **Lesson 4 (capstone core)** | `lessons/04-compare-and-where/` (README + `app.html`). | T3 | Composing calls; **the honesty model displayed truthfully**; fully offline |
-| **T5** | **Lesson 5 (capstone stretch, optional)** | `lessons/05-drop-the-pins/` (README + `app-map.html`). Marked optional. | T4 | The one new dependency (Leaflet/CDN); **the offline→online tradeoff flagged**; no-coord places not drawn |
+| **T5** | **Lesson 5 (capstone stretch)** | `lessons/05-drop-the-pins/` (README + `app-map.html`). The stretch/graduation lesson — **not advertised "optional" on the front door** (§2.5, §3.4); skippability is conveyed at Lesson 4's closer. | T4 | The one new dependency (Leaflet/CDN); **the offline→online tradeoff flagged**; no-coord places not drawn |
 | **T6** | **The two freebies** | `recipes.md` + `ideas.md`. | T5 | Snippets are paste-ready and match the lessons; ideas seed real use cases |
 | **T7** | **Branding & graduation polish** | Banner committed, repo description, topics/tags, final README pass, the **"you're a Concord builder now → here's where builders go"** close (→ `docs/API.md`, `ideas.md`, invitation to share). Last slice, after lessons settle. | T6 | Tone; the induction close; **parity with Concord's branding** |
 
@@ -382,6 +450,12 @@ freebies," one coherent reciprocity unit. *T7* bundles all branding + final poli
 Concord's Slice 9 ("docs & polish last, after things settle"). Every other slice is the
 smallest load-bearing unit: one lesson each — including Lesson 1, which is just a README but is
 the first banked win and deserves its own reviewable PR.
+
+**Front-door refinement (post-T0).** T0 shipped the skeleton; slices **T0a–T0c** then refined the
+front door as real readers tested it — splitting the run instructions into `SETUP.md`, cutting the
+README down to its just-in-time job, and recording the §5.1 rules. So T0's row above describes the
+*original* scaffold; the front door's current shape is **§3.4 + §4**. **T1a** likewise moved the
+songbird beat into Lesson 1's closer (§5.1). The remaining rows (T2–T7) are unchanged.
 
 ### 8.1 Cross-cutting verification gate (folded into T2)
 
