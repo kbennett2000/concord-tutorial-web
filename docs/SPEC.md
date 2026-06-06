@@ -1,13 +1,15 @@
 # concord-tutorial-web — Build Spec
 
-> Status: in build. The repo exists; the front door (README, SETUP.md, CLAUDE.md) and Lesson 1
-> have shipped; **T2 is next**. This document is the blueprint cc builds against, one slice per
-> PR (§8); it lives at `docs/SPEC.md` in the repo. Same spec-first, PR-per-slice discipline as
-> Concord; Kris merges after review.
+> Status: in build. The repo exists; the front door (README, SETUP.md, CLAUDE.md), Lesson 1, and
+> Lesson 2 (with its committed screenshot tooling) have shipped; **T3 is next**. This document is
+> the blueprint cc builds against, one slice per PR (§8); it lives at `docs/SPEC.md` in the repo.
+> Same spec-first, PR-per-slice discipline as Concord; Kris merges after review.
 >
-> **Synced through the T0/T1 front-door slices** (T0a–T0c, T1a): the run instructions now live in
-> `SETUP.md` (§3.1, §4), and four governing rules earned during those rounds are recorded in §5.1
-> (operative verbatim in CLAUDE.md).
+> **Synced through the T2 lesson slices** (T0a–T0c, T1a, T2a–T2c) and the Concord CORS fix: the run
+> instructions live in `SETUP.md` (§3.1, §4); six governing rules are recorded in §5.1 (operative
+> verbatim in CLAUDE.md); lessons carry committed screenshots (§5.2); and a real Concord
+> cache-poisoning bug found during T2c was **fixed at the root in Concord** (§3.2), so the course
+> now pins to **Concord v1.0.2**, not v1.0.0.
 
 ## 0. What this is — and who it's for
 
@@ -31,8 +33,9 @@ happens to use Concord, not API documentation that beginners can tolerate.
 the `concord-tutorial-*` glob the main README promised. It **assumes Concord is already
 running** and, if it isn't, points to the existing Quick start / Deployment docs rather than
 re-explaining install (§3). It pins to Concord's **`/v1` surface** (a stated stable contract)
-and `v1.0.0`. Proof it's worth their time: **songbird** is a real app already running on these
-exact endpoints — we point at it as evidence, not a hypothetical.
+and **v1.0.2** (the release carrying the CORS cache fix from §3.2). Proof it's worth their time:
+**songbird** is a real app already running on these exact endpoints — we point at it as evidence,
+not a hypothetical.
 
 ## 1. Design principles (these drive concrete decisions, not just tone)
 
@@ -229,9 +232,10 @@ to run a local server). So there is exactly one recommended path, stated with no
    it); give a one-line check (`python3 --version`) and a python.org link if it's absent.
 
 Implementation rule for cc, load-bearing: **every fetch is a plain `fetch(url)` with no custom
-headers.** That keeps it a CORS "simple request," so Concord's existing
-`Access-Control-Allow-Origin: *` is honored with **no preflight** — and Concord needs **no
-change**. Do not add `Content-Type`, `Authorization`, or other headers to these GETs.
+headers.** That keeps it a CORS "simple request," so Concord's `Access-Control-Allow-Origin: *` is
+honored with **no preflight**. Do not add `Content-Type`, `Authorization`, or other headers to
+these GETs. (This is *necessary but not sufficient*: a simple request still tripped a real
+cache-poisoning bug on the Lesson 1 → Lesson 2 path, now fixed in Concord — see §3.2.)
 
 ### 3.2 Why "Chrome blocks localhost" doesn't apply to us (worth one sentence in the README)
 
@@ -240,7 +244,27 @@ reaching into a more-private network (localhost or a LAN IP). Our page and Conco
 **same** address band — both on `localhost` (the happy path), or both on the same LAN (the
 cross-machine footnote) — so the gate never fires. The only blocked scenario, a public site
 talking to a LAN Concord, is exactly what Concord's `SECURITY.md` says not to do; it stays out
-of scope, and Concord requires no CORS change for anything this course does.
+of scope.
+
+### 3.2.1 The cache-poisoning bug we found and fixed (Concord v1.0.2)
+
+The course's run path is solid because a real Concord bug was **fixed at the root**, not worked
+around — worth recording, since it's why the spec no longer claims "Concord needs no change."
+
+During T2c (screenshots), driving the actual reader path surfaced it. Lesson 1 has the reader
+visit a verse URL directly in the address bar — a top-level navigation, which sends *no* `Origin`
+header — so Concord's CORS middleware returns that response with **no** `Access-Control-Allow-Origin`,
+and it's cached hard (verses are `immutable`, one year). Lesson 2 then fetches that *same*
+pre-filled verse cross-origin; with **no `Vary: Origin`** on the cached response, the browser
+reuses the `ACAO`-less cached copy, the CORS check fails, and the reader sees the calm "couldn't
+reach Concord — is it running?" message while Concord is up. Silent, confusing, and squarely on the
+happy path (Lesson 1 sends them to John 3:16; Lesson 2 pre-fills John 3:16).
+
+The fix is one line in Concord's shared `cached_json_response` helper — add `Vary: Origin` — which
+covers every cacheable endpoint and both the 200 and 304 paths, and helps **every** consumer that
+mixes a direct visit with a cross-origin fetch (songbird, soap-journal included). Shipped in
+**Concord v1.0.2**; the course pins there. Because it's fixed in Concord, the lessons need no
+mitigation (no cache-busting, no `no-store`) and stay clean.
 
 ### 3.3 The base-URL one-liner
 
@@ -302,19 +326,26 @@ concord-tutorial-web/
 │   └── banner.svg                # committed banner (§7), mirrors Concord's docs/banner.svg
 ├── lessons/
 │   ├── 01-is-it-on/
-│   │   └── README.md             # browser-only lesson, no code file (no SETUP link — nothing to set up)
+│   │   ├── README.md             # browser-only lesson, no code file (no SETUP link — nothing to set up)
+│   │   └── images/               # checkpoint screenshots (§5.2)
 │   ├── 02-show-me-a-verse/       # 02–05 each open with a one-line "do SETUP.md first" pointer
 │   │   ├── README.md
-│   │   └── verse.html
+│   │   ├── verse.html
+│   │   └── images/               # checkpoint screenshots (§5.2)
 │   ├── 03-find-by-idea/
 │   │   ├── README.md
-│   │   └── search.html
+│   │   ├── search.html
+│   │   └── images/
 │   ├── 04-compare-and-where/
 │   │   ├── README.md
-│   │   └── app.html
+│   │   ├── app.html
+│   │   └── images/
 │   └── 05-drop-the-pins/         # the stretch/graduation lesson (not advertised "optional" on the front door)
 │       ├── README.md
-│       └── app-map.html
+│       ├── app-map.html
+│       └── images/
+├── tools/
+│   └── screenshots/              # MAINTAINER-ONLY screenshot generator (§5.2); NOT part of the course; node_modules/ gitignored
 ├── recipes.md                    # "steal these" snippets (§6)
 └── ideas.md                      # "what could you build?" (§6)
 ```
@@ -326,6 +357,9 @@ concord-tutorial-web/
   *not* API documentation, and it does **not** hold the run instructions (those are `SETUP.md`)
   or an up-front lesson map.
 - **`SETUP.md`** holds the single blessed run path (§3.1); Lessons 2–5 link to it at the top.
+- **`tools/screenshots/`** is maintainer-only (§5.2) — Node/Playwright walled off here, never
+  referenced by a lesson; `node_modules/` is gitignored and the repo root stays npm-free. Each
+  lesson's checkpoint screenshots live beside it in `lessons/NN-…/images/`.
 
 ## 5. Voice & formatting rules (so cc writes every lesson consistently)
 
@@ -373,6 +407,42 @@ the reasoning lives here.
   delete encouragement. Proof-it's-real and you-could-build-this beats (Unity) land hardest right
   *after* a win — at a lesson's closer — never as front-door preamble. (Why songbird's "a real app
   already runs on these endpoints" moved from the README to Lesson 1's closer.)
+- **Working first, explanation second — the win before the why.** A beginner needs to *see it run*
+  before they care how it runs; never gate the hands-on behind a wall of explanation. A code lesson
+  opens by getting the reader to a *running, working result* as fast as possible (start the
+  preview, open the page, watch it work), and only *then* explains how, for the reader who's now
+  curious. The structure for code lessons: callback → what we're building (a sentence or two) → get
+  it running and watch it work (the win) → how it works, piece by piece (the reward, not the gate) →
+  the two closers. (Found when Lesson 2 made the reader read a full code dissection before anything
+  worked — backwards.)
+- **Setup happens once; lessons assume it's done.** The reader sets up a single time — getting the
+  files and starting a local preview (`SETUP.md`), and confirming Concord is on (the README's
+  front-door check, before Lesson 1). From Lesson 2 on, lessons *assume* that's done: they link to
+  `SETUP.md` rather than re-explaining it, and they do **not** re-gate the Concord check atop each
+  lesson. A setup step reappears only as *troubleshooting*, tied to a symptom ("page blank? make
+  sure Concord's still running") — never a standalone toll every lesson. Repeating setup reads as
+  friction and mild condescension; establish it once, trust the reader. (Also closed a real hole:
+  no file ever told the reader how the lesson files reach their computer — `SETUP.md`'s "Get the
+  files" download-the-ZIP step now does.)
+
+### 5.2 Visual checkpoints (no lesson page without a visual)
+
+A scannable page reassures (§5.1); a *picture of the working result* reassures more — there is real
+comfort in comparing your screen to the guide's and seeing the same thing. So **every lesson page
+carries visual checkpoints**: a screenshot at each point the reader pauses, captioned like "your
+screen should look about like this," with real descriptive alt text. The shots are of the *running
+result*, not the code (they can already read the code in the file). For a code lesson that means
+the page on load, the win, and each notable state — including the friendly error states, which calm
+exactly when something looks wrong. Even browser-only Lesson 1 gets the reassuring ones: what
+`/healthz` looks like, and that the raw-JSON "mess" is normal and expected.
+
+The screenshots are generated against a **live Concord** (real Scripture — authenticity is the
+point) by a committed Playwright tool in **`tools/screenshots/`**. Hard boundary, stated in that
+folder's own README: this is **maintainer** tooling, **not part of the course** — learners never
+touch Node, npm, or Playwright; the lessons stay genuinely dependency-free, and the tool is never
+referenced from a lesson. `node_modules/` is gitignored; the repo root stays npm-free. **Staleness
+rule:** when a lesson's page changes, its screenshots regenerate in the *same* slice, so the
+pictures never drift from reality.
 
 ## 6. The two freebies (reciprocity, made concrete)
 
@@ -444,6 +514,7 @@ lesson is its own load-bearing unit. The two intentionally-combined slices are f
 | **T5** | **Lesson 5 (capstone stretch)** | `lessons/05-drop-the-pins/` (README + `app-map.html`). The stretch/graduation lesson — **not advertised "optional" on the front door** (§2.5, §3.4); skippability is conveyed at Lesson 4's closer. | T4 | The one new dependency (Leaflet/CDN); **the offline→online tradeoff flagged**; no-coord places not drawn |
 | **T6** | **The two freebies** | `recipes.md` + `ideas.md`. | T5 | Snippets are paste-ready and match the lessons; ideas seed real use cases |
 | **T7** | **Branding & graduation polish** | Banner committed, repo description, topics/tags, final README pass, the **"you're a Concord builder now → here's where builders go"** close (→ `docs/API.md`, `ideas.md`, invitation to share). Last slice, after lessons settle. | T6 | Tone; the induction close; **parity with Concord's branding** |
+| **CI** | **Three-engine smoke (incl. WebKit)** | A GitHub Actions job that runs `tools/screenshots/smoke.mjs` — Playwright's CI setup installs Chromium + Firefox + **WebKit** (with system deps) on a stock runner — against a Concord container, closing the WebKit gap §8.1 flags. Not strictly sequential: can land anytime after T2. | T2 | Gate is genuinely three engines, automated; the maintainer tool stays walled off |
 
 **Flagged combined slices.** *T6* bundles `recipes.md` + `ideas.md` — both small, both "the
 freebies," one coherent reciprocity unit. *T7* bundles all branding + final polish, mirroring
@@ -454,8 +525,15 @@ the first banked win and deserves its own reviewable PR.
 **Front-door refinement (post-T0).** T0 shipped the skeleton; slices **T0a–T0c** then refined the
 front door as real readers tested it — splitting the run instructions into `SETUP.md`, cutting the
 README down to its just-in-time job, and recording the §5.1 rules. So T0's row above describes the
-*original* scaffold; the front door's current shape is **§3.4 + §4**. **T1a** likewise moved the
-songbird beat into Lesson 1's closer (§5.1). The remaining rows (T2–T7) are unchanged.
+*original* scaffold; the front door's current shape is **§3.4 + §4**. **T1a** moved the songbird
+beat into Lesson 1's closer (§5.1).
+
+**Lesson-2 refinement (post-T2) and the CORS fix.** T2 shipped `verse.html`, then spawned three
+sub-slices as readers tested it: **T2a** reordered the lesson to *working-first* (§5.1); **T2b**
+added `SETUP.md`'s "Get the files" step and the *setup-once* rule (§5.1); **T2c** added the
+committed screenshot tooling and the per-lesson `images/` (§5.2). T2c also surfaced a real Concord
+CORS cache-poisoning bug, **fixed at the root in Concord v1.0.2** (§3.2.1) — the course pins there.
+The **CI slice** below closes the one remaining verification gap (WebKit). Rows T3–T7 are unchanged.
 
 ### 8.1 Cross-cutting verification gate (folded into T2)
 
@@ -470,9 +548,15 @@ the same way.) Record the result in the PR; add a one-line note to `SETUP.md` on
 needs a caveat the reader must know. If any browser surprises us, it's caught here — on one page —
 not after five lessons assume it.
 
-## 9. Decisions & the one remaining fork
+**Status (honest).** T2's gate ran green on **Chrome + Firefox** against live Concord. WebKit is
+*tool-ready, not yet run*: the build host (Ubuntu 26.04) can't install WebKit's system libs, but
+the committed `tools/screenshots/smoke.mjs` runs it on a capable host, and the **CI slice** (§8)
+closes the gap durably (Playwright's CI setup installs WebKit cleanly). So today's gate is **two
+engines verified, three tool-covered** — not overclaimed as three.
 
-The first draft's open questions are now resolved and folded into the spec above:
+## 9. Decisions (all resolved)
+
+Every open question from the first draft is resolved and folded into the spec above:
 
 - **Lesson text home** — per-folder `README.md`. ✅ (§4)
 - **`ideas.md`** — its own file. ✅ (§4, §6)
@@ -480,22 +564,21 @@ The first draft's open questions are now resolved and folded into the spec above
   **KJV / WEB / ASV** (old vs. modern is its own demo). ✅ (§2.4, §5)
 - **Banner** — scaffolding/blueprint direction + tagline *"now build with it."*; palette, motif,
   and metaphor locked. ✅ (§7)
-- **Repo description + topics** — locked drafts in §7 (confirm exact wording).
-- **Concord version pin** — pin examples to the **`/v1`** contract and **v1.0.0** unless a newer
-  surface should be targeted.
+- **Repo description + topics** — confirmed as the §7 drafts. ✅
+- **Concord version pin** — **v1.0.2** (the release carrying the §3.2.1 CORS fix), on the **`/v1`**
+  contract. ✅ (§0, §3.2.1)
+- **Start fork** — **(a) lock-then-build**, chosen; the build has run T0 → T2 (plus refinement
+  sub-slices) this way, one PR per slice, Kris merging. ✅
+- **WebKit/Safari verification** — a **named CI slice** (§8) closes it durably; until it lands, the
+  gate is honestly Chrome + Firefox verified, WebKit tool-covered (§8.1). ✅ (scheduled)
 
-**The one remaining fork — how cc starts:**
-
-- **(a) Lock-then-build (the lean):** this spec is the complete handoff; cc runs T0 → T7 against
-  it, one PR per slice, Kris merging.
-- **(b) Draft-first:** cc builds **T0 + Lesson 1** as a tone/shape proof, we react, then cc runs
-  the rest.
-
-Either way the build is sliced and merged exactly as Concord was.
+Nothing here is open; the build proceeds slice-by-slice per §8 — **T3 next**.
 
 ---
 
-*This spec keeps Concord untouched: the course wires to its existing `/v1` surface and existing
-install/deploy docs, and requires no Concord code or CORS change (§3). Any new documentation
-lives in this repo; nothing here edits the main Concord repo except, eventually, flipping the
-README's "tutorials coming" line to point at this one — a separate, later change to confirm.*
+*The course wires to Concord's existing `/v1` surface and install/deploy docs and adds **no
+mitigation hacks** — but it does not pretend Concord went untouched: building it surfaced a real
+CORS cache-poisoning bug, **fixed at the root in Concord v1.0.2** (§3.2.1), which is why the course
+pins there and which benefits every Concord consumer. The only remaining cross-repo change is
+flipping Concord's README "tutorials coming" line to point at this one once it's far enough along —
+a separate, later change to confirm.*
