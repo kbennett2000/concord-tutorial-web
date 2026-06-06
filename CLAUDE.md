@@ -47,6 +47,21 @@ reader, a page that *looks* easy signals "you can do this"; a dense block signal
   an all-bullets checklist and never a gray wall. The goal is "warm, broken into
   scannable pieces."
 
+**No unexplained jargon — especially the tooling.** The reader has never coded: a word
+that's obvious to a developer is a wall to them. The lesson's *topic* (API, endpoint,
+JSON, fetch…) gets taught as it's introduced — but the **incidental tooling** the reader
+is told to touch is the easy thing to forget, and just as alien. The first time you name
+any of it, add a one-line plain gloss and a link where one exists — the editor (**VS Code**:
+what it is + link), an **extension** (what installing one means), the **terminal**, a
+**command**, a programming **language** (e.g. Python — and why it's even mentioned). Two
+hard rules:
+- **Never name a scary unknown just to reassure.** Saying "no npm" to calm someone who's
+  never heard of npm introduces a new fear instead of removing one. Reassure only in words
+  the reader already knows.
+- **Never make the reader inventory their own machine.** Instead of "use whichever you have,"
+  recommend one friendly default and let an "already comfortable with X?" line self-select
+  any alternative — so a beginner is never asked to figure out what's installed.
+
 ## The three principles (they drive decisions — see SPEC §1)
 
 - **Commitment & Consistency:** every lesson is numbered and completable; **no lesson ever ends

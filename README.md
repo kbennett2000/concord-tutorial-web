@@ -46,27 +46,58 @@ endpoints you're about to use. The surface holds real apps. Yours is next.
 
 - A running Concord (the check above).
 - A web browser. *(That's everything Lesson 1 needs.)*
-- For Lessons 2 and up: VS Code with the Live Server extension, or Python — whichever you have.
+- For Lessons 2 and up: one free tool — the next section walks you through setting it up.
 
-No accounts, no sign-ups, no `npm`. Nothing reaches the internet until the optional final
-lesson, and we'll flag it clearly when it does.
+Nothing to sign up for, and nothing to install beyond that one free tool. Nothing reaches the
+internet until the optional final lesson, and we'll flag it clearly when it does.
 
 ## How to run a lesson
 
 From Lesson 2 onward, each lesson is a real file you open in a web browser. There's one way to
-open it that works, and it's worth learning once, here.
+open it that works, and the friendly setup below gets you there in a few minutes — you only do
+it once, and then it's the same every lesson. Here's the easy path.
 
-Serve the lesson over `http://localhost` — pick whichever of these you have:
+### The easy way: VS Code + Live Server
 
-> 1. **VS Code + Live Server (the easy default).** Open the lesson's folder in VS Code, install
->    the Live Server extension once, then click "Go Live" at the bottom of the window. Your page
->    opens at `http://localhost:5500` and refreshes itself every time you save — editing becomes
->    fun.
-> 2. **Python (no VS Code needed).** Open a terminal *inside the lesson's folder* and run:
->    ```
->    python3 -m http.server 5500
->    ```
->    Then visit `http://localhost:5500` in your browser. Most computers already have Python.
+[VS Code](https://code.visualstudio.com/) is a free code editor from Microsoft — a program for
+opening and editing the lesson files. If you don't have it yet, download and install it from
+that link; it's free and takes a couple of minutes.
+
+Inside VS Code you'll add one *extension* — a small add-on you install with a single click. The
+one we want is **Live Server**: it shows your lesson page in the browser at `http://localhost`
+and quietly refreshes it every time you save, so your changes appear instantly.
+
+Once VS Code is installed:
+
+1. Open the lesson's folder in VS Code.
+2. Install the Live Server extension once: open the Extensions panel, search for "Live Server,"
+   and click "Install."
+3. Click "Go Live" in the bar at the bottom of the window.
+
+Your lesson page opens at `http://localhost:5500`. That's it — you're running.
+
+### Already comfortable with a terminal? Use Python instead
+
+If you'd rather not install VS Code and you've used a *terminal* before — the text window where
+you type commands to your computer directly — you can serve a lesson with Python instead. *Python*
+is a programming language; we use it here only to run a tiny local web server, nothing more.
+
+Open a terminal inside the lesson's folder and check whether Python is already there:
+
+```
+python3 --version
+```
+
+If you see a version number, you're set. If not, install it from
+[python.org/downloads](https://www.python.org/downloads/).
+
+Then run this command to serve the lesson:
+
+```
+python3 -m http.server 5500
+```
+
+and visit `http://localhost:5500` in your browser.
 
 **Opening the file by double-clicking it does not work.** When you double-click an `.html` file,
 your browser loads it from a `file://` address, and browsers refuse to let a `file://` page talk
