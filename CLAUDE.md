@@ -132,8 +132,8 @@ There is no automated test suite here — the proof is that the lesson **works**
 slice done: serve the lesson via the blessed path, open it, and confirm the feature works end to
 end (a real verse appears; both search panes populate; places render honestly; the map draws the
 located places and lists the unknown ones). Honor the **no-broken-ending** rule — a lesson that
-doesn't run is not done. At **T2**, verify the served-page path on Chrome, Firefox, and Safari
-against a live Concord (SPEC §8.1) before later lessons lean on it.
+doesn't run is not done. At **T2**, verify the served-page path on Chrome and Firefox against a
+live Concord (SPEC §8.1) before later lessons lean on it.
 
 ## Taste & restraint
 
