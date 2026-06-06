@@ -14,6 +14,10 @@ make sure Concord was awake?
 http://localhost:8000/healthz
 ```
 
+Your screen should look about like this:
+
+![Concord's /healthz response shown in the browser as a line of JSON with translation, verse, and place counts](images/healthz.png)
+
 That blob of text that came back — the one with counts in it — wasn't a web page. It was
 *data*, sent straight to you by Concord. Which means: **you just made your first API call.**
 
@@ -68,7 +72,9 @@ it yourself, out in the open.
 ## A note on the mess
 
 That verse probably looked cluttered — curly braces, quotation marks, labels crowding the text.
-That's completely normal, and nothing is wrong.
+That's completely normal, and nothing is wrong. It looks about like this:
+
+![John 3:16 returned as raw JSON in the browser, the verse text wrapped in braces and quotes](images/verse-json.png)
 
 Firefox tidies JSON into a neat, foldable view; other browsers show it raw. **Both are fine** —
 you don't need to install anything to read it. In the very next lesson, we'll take this same
