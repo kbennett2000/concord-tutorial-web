@@ -62,6 +62,20 @@ hard rules:
   recommend one friendly default and let an "already comfortable with X?" line self-select
   any alternative — so a beginner is never asked to figure out what's installed.
 
+**Just-in-time, not just-in-case — don't explain anything until the reader needs it to
+take the next step.** Everything true is not everything useful. If a sentence isn't
+helping the reader do the thing in front of them *right now*, it's costing them
+attention and confidence. Default to cut, defer, or link — never pre-load.
+- **Setup, caveats, and concepts appear in the lesson that needs them**, not earlier.
+- **The roadmap is a destination, not a syllabus.** Don't open with a map of all lessons;
+  if a "what's ahead" list earns a place, it goes at the *end* as encouragement.
+- **Never answer a question the reader hasn't asked** — especially not a reassurance.
+  Naming a fear to soothe it ("don't worry, Lesson 5 isn't too hard"; "no npm needed")
+  plants the fear. If a real heads-up is needed, it belongs in the lesson where it
+  becomes actionable, in words the reader already knows.
+This supersedes any pull toward completeness on entry pages: the front door's job is to
+get hands-on fast, not to brief.
+
 ## The three principles (they drive decisions — see SPEC §1)
 
 - **Commitment & Consistency:** every lesson is numbered and completable; **no lesson ever ends
