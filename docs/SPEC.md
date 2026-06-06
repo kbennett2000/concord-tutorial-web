@@ -461,11 +461,14 @@ songbird beat into Lesson 1's closer (§5.1). The remaining rows (T2–T7) are u
 
 `file://` is already settled (out) by current-browser research, so we don't re-litigate it. But
 before building Lessons 3–5 on the served-page path, **T2's review gate** confirms the *blessed*
-path end-to-end: run **Live Server** *and* **`python3 -m http.server`** against a live Concord
-on **Chrome, Firefox, and Safari**, and confirm a plain `GET` to `/healthz` and
-`/v1/verses/{ref}` succeeds from the served page. Record the result in the README's
-troubleshooting note. If any browser surprises us, it's caught here — on one page — not after
-five lessons assume it.
+path end-to-end: serve the lesson over `http://localhost` (Live Server and `python3 -m
+http.server` are network-equivalent — same `:5500` static origin, same CORS conditions) against a
+live Concord on **Chrome and Firefox**, and confirm a plain `GET` to `/healthz` and
+`/v1/verses/{ref}` succeeds from the served page. (Safari/WebKit is out of the gate: it can't run
+on the Linux build host, and a header-free GET is a standard CORS simple request WebKit honors
+the same way.) Record the result in the PR; add a one-line note to `SETUP.md` only if a browser
+needs a caveat the reader must know. If any browser surprises us, it's caught here — on one page —
+not after five lessons assume it.
 
 ## 9. Decisions & the one remaining fork
 

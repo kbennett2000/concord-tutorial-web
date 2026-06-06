@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Show me a verse</title>
+  <style>
+    /* Just enough styling that the page doesn't look broken. The code is the lesson. */
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      max-width: 40rem; margin: 2rem auto; padding: 0 1rem;
+      line-height: 1.5; color: #1c2733; background: #faf7f0;
+    }
+    h1 { font-size: 1.4rem; color: #2A4A6B; }
+    .row { display: flex; gap: .5rem; margin: 1.25rem 0; }
+    input {
+      flex: 1; padding: .5rem .6rem; font-size: 1rem;
+      border: 1px solid #c9bfa8; border-radius: .4rem;
+    }
+    button {
+      padding: .5rem .9rem; font-size: 1rem; cursor: pointer;
+      border: 0; border-radius: .4rem; background: #2A4A6B; color: #fff;
+    }
+    .verse {
+      margin: 1rem 0; padding: .75rem 1rem; background: #fff;
+      border: 1px solid #ece3cf; border-radius: .5rem;
+    }
+    .verse .ref { font-weight: 600; color: #2A4A6B; margin-bottom: .25rem; }
+    .message {
+      margin: 1rem 0; padding: .75rem 1rem; border-radius: .5rem;
+      background: #fbeee0; border: 1px solid #e7cda8;
+    }
+    .message small { display: block; margin-top: .35rem; color: #6b5b40; }
+  </style>
+</head>
+<body>
+  <h1>Show me a verse</h1>
+  <p>Type a reference like <code>John 3:16</code> and press the button.</p>
+
+  <div class="row">
+    <input id="ref" value="John 3:16" aria-label="Bible reference">
+    <button id="go">Show verse</button>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    // Where Concord lives. Change this only if Concord runs on another computer.
+    const CONCORD = "http://localhost:8000";
+
+    const input = document.getElementById("ref");
+    const result = document.getElementById("result");
+
+    // Always say something human — never leave a blank page or dump a raw error.
+    function showMessage(text, hint) {
+      result.innerHTML = "";
+      const box = document.createElement("div");
+      box.className = "message";
+      box.textContent = text;
+      if (hint) {
+        const small = document.createElement("small");
+        small.textContent = hint;
+        box.appendChild(small);
+      }
+      result.appendChild(box);
+    }
+
+    // Put the verses on the page. `verses` is the list Concord sent back.
+    function render(verses) {
+      result.innerHTML = "";
+      for (const v of verses) {
+        const box = document.createElement("div");
+        box.className = "verse";
+
+        const ref = document.createElement("div");
+        ref.className = "ref";
+        ref.textContent = v.reference;   // Concord hands us a ready-made label, e.g. "John 3:16"
+
+        const body = document.createElement("div");
+        // v.text is keyed by translation; with the default there's just one. Show whatever came back.
+        body.textContent = Object.values(v.text).join(" ");
+
+        box.appendChild(ref);
+        box.appendChild(body);
+        result.appendChild(box);
+      }
+    }
+
+    async function showVerse() {
+      const ref = input.value.trim();
+      if (!ref) return;
+
+      // The same address you typed in Lesson 1. encodeURIComponent turns the space into %20 for us.
+      const url = `${CONCORD}/v1/verses/${encodeURIComponent(ref)}`;
+
+      let response;
+      try {
+        // fetch asks Concord for the data; await waits right here until Concord answers.
+        response = await fetch(url);
+      } catch (e) {
+        // We never reached Concord at all — it's probably not running.
+        showMessage("Couldn't reach Concord — is it running?",
+                    "Check " + CONCORD + "/healthz in your browser.");
+        return;
+      }
+
+      // Read the body as JSON. (JSON is the text format Concord answers in; this turns it into
+      // data your code can use.) Concord sends JSON whether the answer is good or an error.
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Not found, mistyped, and so on. Concord explains itself in a tidy envelope:
+        // { error: { code, message, detail } } — we read the message and stay kind.
+        const said = data.error && data.error.message ? "Concord said: " + data.error.message : "";
+        showMessage("Hmm — couldn't find that. Try something like John 3:16.", said);
+        return;
+      }
+
+      render(data.verses);   // the happy path: show the verse (or verses, if you typed a range)
+    }
+
+    document.getElementById("go").addEventListener("click", showVerse);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") showVerse(); });
+  </script>
+</body>
+</html>
