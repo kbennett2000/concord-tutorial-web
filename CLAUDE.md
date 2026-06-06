@@ -73,6 +73,10 @@ attention and confidence. Default to cut, defer, or link — never pre-load.
   Naming a fear to soothe it ("don't worry, Lesson 5 isn't too hard"; "no npm needed")
   plants the fear. If a real heads-up is needed, it belongs in the lesson where it
   becomes actionable, in words the reader already knows.
+- **Motivation is timed, not cut.** "Just-in-time" defers *instructions and caveats*; it does
+  not delete encouragement. Proof-it's-real and you-could-build-this beats (Unity) land
+  hardest right *after* a win, not on the cold entry page — place them at a lesson's closer,
+  where the reader has just felt success, never as front-door preamble.
 This supersedes any pull toward completeness on entry pages: the front door's job is to
 get hands-on fast, not to brief.
 
