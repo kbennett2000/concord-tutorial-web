@@ -1,7 +1,23 @@
-# Setup — running the lesson files
+# Setup — get the files and run them
 
-This is the one-time setup for running the lesson files. You'll need it from Lesson 2 onward —
-Lesson 1 needs nothing but your browser.
+This is the one-time setup: getting the lesson files onto your computer, and starting a local
+preview to run them. You'll need it from Lesson 2 onward — Lesson 1 needs nothing but your
+browser.
+
+## Get the files
+
+Right now you're looking at this course on GitHub, in your web browser. First, get your own copy
+onto your computer:
+
+1. On this repo's page on GitHub, click the green "Code" button, then "Download ZIP."
+2. Unzip it — on most computers, just double-click the downloaded file. You'll get a folder named
+   `concord-tutorial-web`.
+
+That unzipped `concord-tutorial-web` folder holds everything — every lesson and its files. When a
+lesson says "this folder" or "open the lesson's folder," it means one of the lesson folders inside
+it, like `lessons/02-show-me-a-verse/`.
+
+Already use git? `git clone https://github.com/kbennett2000/concord-tutorial-web` works too.
 
 ## How to run a lesson
 

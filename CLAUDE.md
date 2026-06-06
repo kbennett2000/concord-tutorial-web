@@ -89,6 +89,15 @@ what we're building (a sentence or two) → **get it running and watch it work (
 it works, piece by piece (the reward, not the gate) → the two closers. The reader should be
 looking at a working page on their own screen inside the first minute.
 
+**Setup happens once; lessons assume it's done.** The reader sets up a single time — getting
+the files and starting a local preview (SETUP.md), and confirming Concord is on (the README's
+front-door check, before Lesson 1). From Lesson 2 on, lessons *assume* that setup is done: they
+link to SETUP.md instead of re-explaining it, and they do NOT re-gate the Concord check at the
+top of each lesson. A setup step reappears in a lesson only as *troubleshooting*, tied to a
+symptom ("page blank? make sure Concord's still running") — never as a standalone toll every
+lesson. Repeating setup reads as friction and mild condescension; establish it once, trust the
+reader, and surface it again only when something breaks.
+
 ## The three principles (they drive decisions — see SPEC §1)
 
 - **Commitment & Consistency:** every lesson is numbered and completable; **no lesson ever ends
