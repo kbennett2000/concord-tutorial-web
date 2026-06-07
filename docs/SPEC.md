@@ -1,15 +1,19 @@
 # concord-tutorial-web — Build Spec
 
-> Status: in build. The repo exists; the front door (README, SETUP.md, CLAUDE.md), Lesson 1, and
-> Lesson 2 (with its committed screenshot tooling) have shipped; **T3 is next**. This document is
-> the blueprint cc builds against, one slice per PR (§8); it lives at `docs/SPEC.md` in the repo.
-> Same spec-first, PR-per-slice discipline as Concord; Kris merges after review.
+> Status: **all five lessons are built and verified — the course is complete end to end.** The
+> front door (README, SETUP.md, CLAUDE.md) and Lessons 1–5 have shipped (T0–T5), each its own PR;
+> what remains is the two freebies (T6), the branding/graduation polish (T7), and a CI slice (§8).
+> This document is the blueprint cc builds against; it lives at `docs/SPEC.md` in the repo. Same
+> spec-first, PR-per-slice discipline as Concord; Kris merges after review.
 >
-> **Synced through the T2 lesson slices** (T0a–T0c, T1a, T2a–T2c) and the Concord CORS fix: the run
-> instructions live in `SETUP.md` (§3.1, §4); six governing rules are recorded in §5.1 (operative
-> verbatim in CLAUDE.md); lessons carry committed screenshots (§5.2); and a real Concord
-> cache-poisoning bug found during T2c was **fixed at the root in Concord** (§3.2), so the course
-> now pins to **Concord v1.0.2**, not v1.0.0.
+> **Synced through T5** (all lesson slices T0–T5 and their sub-slices) and the Concord CORS fix.
+> What's recorded below since the prior sync: a new lead rule heads §5.1 — the umbrella *"write for
+> one real reader"* — with the others recast as instances of it (§5.1); a real Concord
+> cache-poisoning bug found during T2c was **fixed at the root in Concord v1.0.2** (§3.2.1), which
+> the course pins to; Lesson 5 adds the one dependency (Leaflet 1.9.4) and teaches the offline→online
+> tradeoff (§2.5); a missing translation that Concord's API.md calls `null` is actually a placeholder
+> string in v1.0.2 (§2.4); and gates run against the **pulled** v1.0.2 image, never a local rebuild
+> (§8.1).
 
 ## 0. What this is — and who it's for
 
@@ -133,8 +137,13 @@ Lesson 4 (core) and Lesson 5 (stretch) is deliberate and explained in §2.5.
 - **Callback:** "Your app can show a verse someone already knows — now let's help them *find*
   one they don't."
 - **What the learner does:** one input, one button; submitting fires **both** searches and
-  shows results in two columns. Type `do not be anxious`: keyword search misses passages that
-  never use those words; meaning search surfaces them. Then a query where the gap is stark.
+  shows results in two columns, **both pinned to WEB** so the comparison is which *verses* each
+  method finds, not which translation. Type a thematic query whose literal words aren't in the
+  text: keyword search misses passages that never use those words; meaning search surfaces them.
+  *(Shipped pre-fill: `feeling alone and forgotten` → keyword empty, meaning finds Job 19:14 /
+  Psalm 31:12. The design first tried `do not be anxious`, but WEB uses that very wording, so it
+  was swapped after live verification — the contrast must be confirmed against real data, not
+  assumed.)*
 - **The file:** two `fetch` calls — `/v1/search?q=…` (keyword/FTS) and
   `/v1/semantic-search?q=…` (meaning) — each returning a **list**; loop over each list and
   render. Teaches **query parameters** (`?q=…&limit=…`) and **looping over results**.
@@ -151,8 +160,8 @@ Lesson 4 (core) and Lesson 5 (stretch) is deliberate and explained in §2.5.
   the page.
 - **You can now:** let users search Scripture by meaning and by word — and you understand the
   difference.
-- **Acceptance:** both panes populate; the anxiety example visibly demonstrates meaning-search
-  catching what keyword-search misses.
+- **Acceptance:** both panes populate; the chosen example visibly demonstrates meaning-search
+  catching what keyword-search misses (an empty keyword pane is the *teaching moment*, not an error).
 
 ### 2.4 Lesson 4 — Capstone (core): Compare, and where did it happen? *(`app.html`)*
 
@@ -162,12 +171,20 @@ Lesson 4 (core) and Lesson 5 (stretch) is deliberate and explained in §2.5.
   translations side by side** and (b) the **places** that passage names, each shown honestly.
 - **The file composes two calls:**
   - `GET /v1/verses/{ref}?translations=KJV,WEB,ASV` → three columns. (Old vs. modern English is
-    itself interesting and makes parallel translations concrete.)
-  - `GET /v1/verses/{ref}/places` → the places named, each rendered by its **status**:
-    `identified` shows coordinates as plain text ("Athens — 37.98°N, 23.72°E"); `disputed`
-    shows a best-guess coordinate flagged as contested; `unknown` shows *"location unknown"*
-    with **no fabricated coordinates**. Use Acts 17 as the worked example (Athens, Berea,
-    Thessalonica…).
+    itself interesting and makes parallel translations concrete.) **Discrepancy to know:** a
+    translation that omits a verse comes back as the literal string `"[verse not included in this
+    translation]"` in v1.0.2 — *not* `null` as Concord's `docs/API.md` states. The lesson handles
+    both; the inconsistency is a Concord-side doc/code mismatch worth reconciling there (the docs'
+    `null` is arguably the better API design — an English display-string baked into JSON forces
+    that wording on every client).
+  - `GET /v1/verses/{ref}/places` → the places named, each rendered by its **status** (one of
+    five): `identified` and `disputed` carry real coordinates (disputed flagged as a contested
+    best guess); `unknown`, `symbolic`, and `multiple` carry **`null` coordinates** and are shown
+    honestly ("location lost to history" / "a figurative name" / "refers to several places") with
+    **no fabricated coordinates**. *(Shipped win: Genesis 4:16 — Eden and Nod both `unknown`, so the
+    honesty model lands in the very first screen; the `LORD`/`Yahweh`/`Jehovah` divine-name
+    difference across KJV/WEB/ASV is the translation contrast. Acts 17 (located places) and John
+    3:16 (no places — the verse is about an idea) are the live-verified experiments.)*
 - **Concept taught:** composing multiple API calls in one app; reading and **honestly
   displaying** structured data. The honesty model doubles as a *values* lesson — your app tells
   the truth about what's uncertain instead of inventing a pin.
@@ -189,10 +206,15 @@ a front-door caveat that plants doubt before the reader has started.
 
 - **Callback:** "Your app already shows *where* in words. Want to see it on a map? This is the
   step where you go from beginner to builder."
-- **What the learner does:** add **Leaflet** (via CDN `<link>` + `<script>`), drop pins for the
-  `identified` places, flag `disputed` ones, and — crucially — **do not draw** the places with
-  no coordinates; list them beside the map as "not shown — location unknown." The honesty model
-  becomes *visible*: you literally cannot draw what isn't known.
+- **What the learner does:** add **Leaflet 1.9.4** (current stable; 2.0 is alpha-only) via a
+  pinned CDN `<link>` + `<script>` with the official integrity hashes, plus OpenStreetMap tiles
+  (attributed). Drop pins for the located places (`identified`/`disputed`) with name popups, fit
+  the map to them, and — crucially — **do not draw** the no-coordinate places (`unknown`/`symbolic`/
+  `multiple`); list them beside the map as "named here, but location lost — not on the map." The
+  honesty model becomes *visible*: a pin means we know, a footnote means we don't — and the map
+  literally cannot lie, because Concord won't hand it fake coordinates. *(Shipped win: Acts 17 —
+  six pins tracing Paul's route across Greece. Load-bearing gotcha: the `#map` div needs an explicit
+  CSS height or Leaflet renders a blank box.)*
 - **Concept taught:** (1) using a **third-party library** — you don't build everything
   yourself; (2) the **offline → online tradeoff**, taught explicitly.
 - **The honest flag (this is why it's last and optional):** Concord's data is local, but map
@@ -377,11 +399,23 @@ concord-tutorial-web/
 
 ### 5.1 The hard-won rules (front-door lessons — operative wording is verbatim in CLAUDE.md)
 
-These four emerged from iterating the front door and now govern *every* page and lesson. They
-share one root cause — writing for a developer by default, and explaining/reassuring before it's
-due — so they're stated together. CLAUDE.md carries the operative wording cc reads each session;
-the reasoning lives here.
+These emerged from iterating real pages, each earned after a beginner-hostile draft slipped
+through. They share one root cause — writing for a developer by default, explaining or reassuring
+before it's due — so the **lead rule names that root directly, and the rest are its instances**.
+CLAUDE.md carries the operative wording cc reads each session; the reasoning lives here.
 
+- **Write for one real reader — run every line past them (the umbrella).** Picture a specific
+  person: curious, non-technical, has never written a line of code, one frustration from closing
+  the tab. Before anything ships, hold each sentence and each step up to them: *would they know
+  what this means? how to do it? why they're doing it?* Any "no" → cut, explain, or move. Every
+  rule below is an instance of this. Sharpest instance: **never ask the reader to perform an action
+  whose only purpose is to exercise the code** — stop a server, deliberately break something, force
+  an error. That's the builder's job, already done for them; the reader only does what a real user
+  would naturally do, and meets error states through *reassurance* ("if you ever see this, here's
+  what it means"), never by being told to cause them. *(Added after the "Stop Concord and try
+  again" step in Lesson 2 slipped past every specific rule below — proof that a growing list of
+  don'ts has a ceiling, and the audience needs naming at the root. Companion check in CLAUDE.md's
+  "Done" section: before a PR, read the lesson back **as the reader, not the author**.)*
 - **Break the wall — a scannable page is itself reassurance.** For this reader a page that
   *looks* easy signals "you can do this"; a dense block signals "this is hard." Short paragraphs
   (2–4 sentences), frequent plain subheadings, numbered steps for anything sequential, a code
@@ -533,7 +567,13 @@ sub-slices as readers tested it: **T2a** reordered the lesson to *working-first*
 added `SETUP.md`'s "Get the files" step and the *setup-once* rule (§5.1); **T2c** added the
 committed screenshot tooling and the per-lesson `images/` (§5.2). T2c also surfaced a real Concord
 CORS cache-poisoning bug, **fixed at the root in Concord v1.0.2** (§3.2.1) — the course pins there.
-The **CI slice** below closes the one remaining verification gap (WebKit). Rows T3–T7 are unchanged.
+**Lessons 3–5 (post-T2).** T3 shipped `search.html` (the empirical query swap above); **T4** the
+offline capstone `app.html`; **T5** the map `app-map.html` (Leaflet 1.9.4, the offline→online
+tradeoff). Each was built *working-first from the start*, gated on Chromium + Firefox against the
+**pulled v1.0.2** image (§8.1), and carries committed screenshots (§5.2). The umbrella rule (§5.1)
+landed in slice **T2e** alongside a Lesson-2 error-state fix (removing a "Stop Concord and try again"
+step that asked the reader to break things). Remaining: **T6** (freebies), **T7** (branding /
+graduation polish), and the **CI slice** that closes the WebKit gap.
 
 ### 8.1 Cross-cutting verification gate (folded into T2)
 
@@ -548,11 +588,19 @@ the same way.) Record the result in the PR; add a one-line note to `SETUP.md` on
 needs a caveat the reader must know. If any browser surprises us, it's caught here — on one page —
 not after five lessons assume it.
 
-**Status (honest).** T2's gate ran green on **Chrome + Firefox** against live Concord. WebKit is
-*tool-ready, not yet run*: the build host (Ubuntu 26.04) can't install WebKit's system libs, but
-the committed `tools/screenshots/smoke.mjs` runs it on a capable host, and the **CI slice** (§8)
-closes the gap durably (Playwright's CI setup installs WebKit cleanly). So today's gate is **two
-engines verified, three tool-covered** — not overclaimed as three.
+**Status (honest), across all five lessons.** Every lesson's gate ran green on **Chromium +
+Firefox** against live Concord (18/18 checks at Lesson 5). WebKit stayed *tool-ready, not yet run*
+throughout: the build host (Ubuntu 26.04) can't install WebKit's system libs, but the committed
+`tools/screenshots/smoke.mjs` runs it on a capable host, and the **CI slice** (§8) closes the gap
+durably (Playwright's CI setup installs WebKit cleanly). So the gate is **two engines verified,
+three tool-covered** — not overclaimed as three. Lesson 5 deliberately drops Lesson 4's
+localhost-only assertion (its external tiles are the point) and asserts the map and pins render.
+
+**Concord for the gate: pull, never build.** Gates run against the published image
+(`docker pull ghcr.io/kbennett2000/concord:v1.0.2`), confirmed via `docker ps`. **Never rebuild
+Concord from source on a dev box** — no `docker build`, no compose build, especially not
+`--no-cache`: a Concord build re-bakes the embedding model and can pin the machine (it did once,
+mid-T3). The published image exists precisely so no gate needs a local build.
 
 ## 9. Decisions (all resolved)
 
