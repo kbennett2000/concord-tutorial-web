@@ -35,8 +35,8 @@ Now poke at it:
   ![The friendly "Hmm — couldn't find that" message after a made-up reference](images/not-found.png)
 
 One thing you might run into: if the page ever shows "Couldn't reach Concord — is it running?", it
-just means Concord isn't running. Start it again the way you did in [SETUP.md](../../SETUP.md), then
-reload the page.
+just means the page can't find Concord. The fix is quick —
+[When it won't connect](../../SETUP.md#when-it-wont-connect) walks through it — then reload the page.
 
 ![The calm "Couldn't reach Concord — is it running?" message, shown when Concord isn't running](images/concord-unreachable.png)
 

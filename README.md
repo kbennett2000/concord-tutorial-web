@@ -27,9 +27,10 @@ what an "API" is yet, you're exactly who this course is for.
 > http://localhost:8000/healthz
 > ```
 >
-> A blob of text with some counts in it means you're ready. If nothing comes back, head to
-> Concord's [Quick start](https://github.com/kbennett2000/concord#quick-start) to get it
-> running.
+> You're ready when a short line of data comes back — a few counts (how many translations,
+> verses, and places Concord knows about), not a styled web page. If nothing loads or you get an
+> error, it's an easy fix: see [When it won't connect](SETUP.md#when-it-wont-connect), or head to
+> Concord's [Quick start](https://github.com/kbennett2000/concord#quick-start) to get it running.
 
 Lesson 1 needs nothing but your browser. Lesson 2 onward needs a quick one-time setup — see
 [SETUP.md](SETUP.md) when you get there.

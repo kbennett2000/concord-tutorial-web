@@ -94,3 +94,24 @@ If Concord runs on the same computer as you, leave that line exactly as it is.
 If Concord runs on another computer on your network, change only that one line to that machine's
 address (for example `http://192.168.1.62:8000`). Concord's
 [Deployment docs](https://github.com/kbennett2000/concord#deployment) show how to find it.
+
+## When it won't connect
+
+If a lesson page sits blank, or you see "Couldn't reach Concord," don't worry — it's almost
+always one of four small things, and each has a quick fix. The fastest way to tell which one is to
+open Concord's own check in your browser:
+
+```
+http://localhost:8000/healthz
+```
+
+That address asks Concord directly (your browser talks to it straight, so it works even before any
+lesson page does). If a short line of data comes back, Concord is on — and the trouble is on the
+page side. If nothing comes back, Concord itself is the thing to start. Find your symptom below:
+
+| What you see | What it means | What to do |
+|---|---|---|
+| The lesson page is blank, or `http://localhost:5500` won't open | Your local preview isn't running — or you opened the file by double-clicking it (a `file://` address, which can't talk to Concord) | Start the preview again — in VS Code, click **Go Live**; with Python, re-run the `python3 -m http.server 5500` command — and open the page through `http://localhost`, not by double-clicking |
+| `http://localhost:8000/healthz` doesn't load at all | Concord isn't running. Concord runs inside **Docker** — the free program that runs Concord on your computer — so Docker has to be started first | Open Docker, then start Concord the way Concord's [Quick start](https://github.com/kbennett2000/concord#quick-start) shows |
+| Concord won't start and says **"address already in use"** (or "port 8000 is in use") | Another program is already using port 8000 — the address Concord answers on | Close the other program, or start Concord on a different port and change the address in the `CONCORD` line to match |
+| The page loads but shows **"Couldn't reach Concord — is it running?"** | The page reached your screen fine, but can't find Concord at the address in its `CONCORD` line | Open `http://localhost:8000/healthz` to confirm Concord is on, then check that the `CONCORD` line points to where it actually runs |
