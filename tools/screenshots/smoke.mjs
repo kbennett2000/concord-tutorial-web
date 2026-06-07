@@ -1,5 +1,5 @@
-// Three-engine functional check for Lesson 2's verse.html against a LIVE Concord.
-// Runs the same scenarios in Chromium, Firefox, and WebKit (this is how we cover Safari on Linux).
+// Three-engine functional check for the lesson pages against a LIVE Concord.
+// Runs the scenarios in Chromium, Firefox, and WebKit (this is how we cover Safari on Linux).
 // MAINTAINER tooling only. Usage: npm run smoke   (needs Concord on :8000)
 import { chromium, firefox, webkit } from "playwright";
 import { fileURLToPath } from "node:url";
@@ -10,7 +10,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const LESSONS = join(HERE, "..", "..", "lessons");
 const CONCORD = "http://localhost:8000";
 const PORT = 8099;
-const URL = `http://localhost:${PORT}/02-show-me-a-verse/verse.html`;
+const VERSE_URL = `http://localhost:${PORT}/02-show-me-a-verse/verse.html`;
+const SEARCH_URL = `http://localhost:${PORT}/03-find-by-idea/search.html`;
+
+// Lesson 3 queries (verified live in WEB): HEADLINE shows the contrast; EMPTY_KEYWORD has zero
+// word-search hits but rich meaning hits (the teaching empty state).
+const HEADLINE_Q = "feeling alone and forgotten";
+const EMPTY_KEYWORD_Q = "being patient with difficult people";
 
 async function showAndRead(page, ref) {
   await page.fill("#ref", ref);
@@ -26,22 +32,51 @@ async function runEngine(launcher, name, launchOpts = {}) {
   const page = await browser.newPage();
   const checks = {};
   try {
-    await page.goto(URL, { waitUntil: "load" });
+    // ---- Lesson 2: verse.html ----
+    await page.goto(VERSE_URL, { waitUntil: "load" });
 
     const single = await showAndRead(page, "John 3:16");
-    checks["verse shows"] = single.includes("For God so loved the world");
+    checks["L2 verse shows"] = single.includes("For God so loved the world");
 
     await page.fill("#ref", "John 3:16-17");
     await page.click("#go");
     await page.waitForFunction(() => document.querySelectorAll(".verse").length === 2);
-    checks["range = 2 verses"] = true;
+    checks["L2 range = 2 verses"] = true;
 
     const bad = await showAndRead(page, "Hesitations 9:99");
-    checks["friendly not-found"] = bad.includes("couldn't find that");
+    checks["L2 friendly not-found"] = bad.includes("couldn't find that");
 
     await page.route(`${CONCORD}/**`, (r) => r.abort());
     const down = await showAndRead(page, "John 3:16");
-    checks["friendly is-it-running"] = down.includes("is it running");
+    checks["L2 friendly is-it-running"] = down.includes("is it running");
+
+    // ---- Lesson 3: search.html (fresh page so the verse route-abort above doesn't apply) ----
+    const sp = await browser.newPage();
+    const search = async (q) => {
+      await sp.fill("#q", q);
+      await sp.evaluate(() => {
+        document.getElementById("keyword").innerHTML = "";
+        document.getElementById("meaning").innerHTML = "";
+      });
+      await sp.click("#go");
+      await sp.waitForFunction(() => {
+        const k = document.getElementById("keyword").textContent;
+        const m = document.getElementById("meaning").textContent;
+        return k && m && !k.includes("Searching") && !m.includes("Searching");
+      });
+    };
+    await sp.goto(SEARCH_URL, { waitUntil: "load" });
+
+    await search(HEADLINE_Q);
+    checks["L3 meaning pane populates"] = (await sp.locator("#meaning .hit").count()) > 0;
+
+    await search(EMPTY_KEYWORD_Q);
+    checks["L3 empty keyword teaches"] = (await sp.textContent("#keyword")).includes("comes up empty");
+
+    await sp.route(`${CONCORD}/**`, (r) => r.abort());
+    await search(HEADLINE_Q);
+    checks["L3 friendly is-it-running"] = (await sp.textContent("#meaning")).includes("is it running");
+    await sp.close();
   } finally {
     await browser.close();
   }
