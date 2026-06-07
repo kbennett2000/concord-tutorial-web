@@ -43,6 +43,12 @@ jobs:
         working-directory: tools/screenshots
         run: npm ci
 
+      # Assert the /v1 response shapes the lessons parse, directly against v1.0.2. Runs before the
+      # browser install so a shape drift fails in seconds without paying for the Playwright download.
+      - name: Contract check (/v1 shapes vs v1.0.2)
+        working-directory: tools/screenshots
+        run: npm run contract
+
       - name: Install Playwright browsers + system deps (incl. WebKit)
         working-directory: tools/screenshots
         run: npx playwright install --with-deps chromium firefox webkit
