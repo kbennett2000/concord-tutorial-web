@@ -24,6 +24,11 @@ const L4_WIN = "Genesis 4:16";    // Eden & Nod — both honestly lost (no coord
 const L4_LOCATED = "Acts 17:22";  // Athens & Areopagus — real coordinates
 const L4_NOPLACES = "John 3:16";  // 0 places — about an idea
 
+const APP_MAP_URL = `http://localhost:${PORT}/05-drop-the-pins/app-map.html`;
+const L5_WIN = "Acts 17";         // 6 located places — pins
+const L5_LOST = "Genesis 4:16";   // Eden & Nod — honest off-map list, no pins
+const L5_NOPLACES = "John 3:16";  // 0 places
+
 async function showAndRead(page, ref) {
   await page.fill("#ref", ref);
   // Clear the previous result so we wait for THIS request's render, not stale content.
@@ -120,6 +125,39 @@ async function runEngine(launcher, name, launchOpts = {}) {
     await lookUp(L4_WIN);
     checks["L4 friendly is-it-running"] = (await ap.textContent("#compare")).includes("is it running");
     await ap.close();
+
+    // ---- Lesson 5: app-map.html (Leaflet map; external requests EXPECTED — no offline assert) ----
+    const mp = await browser.newPage();
+    const showMap = async (ref) => {
+      await mp.fill("#ref", ref);
+      await mp.click("#go");
+    };
+    await mp.goto(APP_MAP_URL, { waitUntil: "load" });
+    // The height gotcha: the map box must actually have height, or Leaflet draws nothing.
+    checks["L5 map has height"] = (await mp.evaluate(() => document.getElementById("map").offsetHeight)) > 0;
+
+    await showMap(L5_WIN);
+    await mp.waitForFunction(() => document.querySelectorAll(".leaflet-marker-icon").length >= 2);
+    checks["L5 located places become pins"] = (await mp.locator(".leaflet-marker-icon").count()) >= 2;
+
+    await showMap(L5_LOST);
+    await mp.waitForFunction(() => {
+      const l = document.getElementById("lost");
+      return !l.hidden && l.textContent.includes("lost to history");
+    });
+    checks["L5 lost places listed, not pinned"] =
+      (await mp.locator(".leaflet-marker-icon").count()) === 0 &&
+      (await mp.textContent("#lost")).includes("Eden");
+
+    await showMap(L5_NOPLACES);
+    await mp.waitForFunction(() => document.getElementById("msg").textContent.includes("No places to map"));
+    checks["L5 no-places honest"] = true;
+
+    await mp.route(`${CONCORD}/**`, (r) => r.abort());
+    await showMap(L5_WIN);
+    await mp.waitForFunction(() => document.getElementById("msg").textContent.includes("is it running"));
+    checks["L5 friendly is-it-running"] = true;
+    await mp.close();
   } finally {
     await browser.close();
   }

@@ -15,6 +15,7 @@ const img1 = (name) => join(LESSONS, "01-is-it-on", "images", name);
 const img2 = (name) => join(LESSONS, "02-show-me-a-verse", "images", name);
 const img3 = (name) => join(LESSONS, "03-find-by-idea", "images", name);
 const img4 = (name) => join(LESSONS, "04-compare-and-where", "images", name);
+const img5 = (name) => join(LESSONS, "05-drop-the-pins", "images", name);
 
 // Lesson 3 demo queries — must show a stark word-vs-meaning contrast in WEB (verified live).
 const HEADLINE_Q = "feeling alone and forgotten";
@@ -24,6 +25,10 @@ const SECOND_Q = "being patient with difficult people";
 const L4_WIN = "Genesis 4:16";        // translations differ; Eden & Nod both honestly lost
 const L4_LOCATED = "Acts 17:22";      // Athens & Areopagus — real coordinates
 const L4_NOPLACES = "John 3:16";      // 0 places — about an idea
+
+// Lesson 5 references: a striking located route for the win, a lost-places case for the honest list.
+const L5_WIN = "Acts 17";             // 6 located places across Greece — pins trace a route
+const L5_LOST = "Genesis 4:16";       // Eden & Nod — no pins; the honest off-map list
 
 // Lesson 4's two sections have both settled.
 const appSettled = () => {
@@ -130,6 +135,30 @@ async function main() {
   await p5.waitForFunction(appSettled);
   await p5.screenshot({ path: img4("no-places.png"), fullPage: true });
   await ctx4.close();
+
+  // ---- Lesson 5: drive the real app-map.html (own context; needs internet for tiles) ----
+  const ctx5 = await browser.newContext({ viewport: { width: WIDTH, height: 720 } });
+  const murl = `http://localhost:${PORT}/05-drop-the-pins/app-map.html`;
+  const p6 = await ctx5.newPage();
+
+  await p6.goto(murl, { waitUntil: "load" });
+  await p6.waitForTimeout(2000); // let the initial tiles paint
+  await p6.screenshot({ path: img5("on-load.png"), fullPage: true });
+
+  await p6.click("#go"); // the pre-filled win (Acts 17): pins across Greece
+  await p6.waitForFunction(() => document.querySelectorAll(".leaflet-marker-icon").length >= 2);
+  await p6.waitForTimeout(2000); // let tiles for the fitted view paint
+  await p6.screenshot({ path: img5("win.png"), fullPage: true });
+
+  await p6.fill("#ref", L5_LOST);
+  await p6.click("#go"); // Genesis 4:16 — no pins, the honest off-map list
+  await p6.waitForFunction(() => {
+    const lost = document.getElementById("lost");
+    return !lost.hidden && lost.textContent.includes("lost to history");
+  });
+  await p6.waitForTimeout(1000);
+  await p6.screenshot({ path: img5("lost-list.png"), fullPage: true });
+  await ctx5.close();
 
   await browser.close();
   server.close();
