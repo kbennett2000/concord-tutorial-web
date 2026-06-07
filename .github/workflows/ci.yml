@@ -1,0 +1,52 @@
+name: CI
+
+# Three-engine smoke: run the committed maintainer tool (tools/screenshots/smoke.mjs) across
+# Chromium, Firefox, AND WebKit against a live v1.0.2 Concord. A GitHub-hosted runner has root, so
+# it can install WebKit's system libraries — which the dev box can't — so WebKit actually runs here.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  three-engine-smoke:
+    runs-on: ubuntu-latest
+
+    # Concord, the published public image, reachable at localhost:8000. The image carries its own
+    # HEALTHCHECK, so the runner waits for it to be healthy before the steps run.
+    services:
+      concord:
+        image: ghcr.io/kbennett2000/concord:v1.0.2
+        ports:
+          - 8000:8000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tools/screenshots/package-lock.json
+
+      - name: Wait for Concord (v1.0.2) on :8000
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8000/healthz >/dev/null 2>&1; then
+              echo "Concord is up:"; curl -fsS http://localhost:8000/healthz; echo; exit 0
+            fi
+            echo "waiting for Concord… ($i)"; sleep 2
+          done
+          echo "Concord did not become ready on :8000" >&2; exit 1
+
+      - name: Install screenshot-tool deps
+        working-directory: tools/screenshots
+        run: npm ci
+
+      - name: Install Playwright browsers + system deps (incl. WebKit)
+        working-directory: tools/screenshots
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Three-engine smoke (Chromium + Firefox + WebKit)
+        working-directory: tools/screenshots
+        run: npm run smoke
