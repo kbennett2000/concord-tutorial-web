@@ -12,11 +12,17 @@ const CONCORD = "http://localhost:8000";
 const PORT = 8099;
 const VERSE_URL = `http://localhost:${PORT}/02-show-me-a-verse/verse.html`;
 const SEARCH_URL = `http://localhost:${PORT}/03-find-by-idea/search.html`;
+const APP_URL = `http://localhost:${PORT}/04-compare-and-where/app.html`;
 
 // Lesson 3 queries (verified live in WEB): HEADLINE shows the contrast; EMPTY_KEYWORD has zero
 // word-search hits but rich meaning hits (the teaching empty state).
 const HEADLINE_Q = "feeling alone and forgotten";
 const EMPTY_KEYWORD_Q = "being patient with difficult people";
+
+// Lesson 4 references (verified live on v1.0.2).
+const L4_WIN = "Genesis 4:16";    // Eden & Nod — both honestly lost (no coordinates)
+const L4_LOCATED = "Acts 17:22";  // Athens & Areopagus — real coordinates
+const L4_NOPLACES = "John 3:16";  // 0 places — about an idea
 
 async function showAndRead(page, ref) {
   await page.fill("#ref", ref);
@@ -77,6 +83,43 @@ async function runEngine(launcher, name, launchOpts = {}) {
     await search(HEADLINE_Q);
     checks["L3 friendly is-it-running"] = (await sp.textContent("#meaning")).includes("is it running");
     await sp.close();
+
+    // ---- Lesson 4: app.html (fresh page; also record every request URL for the offline check) ----
+    const ap = await browser.newPage();
+    const hosts = new Set();
+    ap.on("request", (r) => { try { hosts.add(new URL(r.url()).hostname); } catch {} });
+    const lookUp = async (ref) => {
+      await ap.fill("#ref", ref);
+      await ap.evaluate(() => {
+        document.getElementById("compare").innerHTML = "";
+        document.getElementById("where").innerHTML = "";
+      });
+      await ap.click("#go");
+      await ap.waitForFunction(() => {
+        const c = document.getElementById("compare").textContent;
+        const w = document.getElementById("where").textContent;
+        return c && w && !c.includes("Looking up") && !w.includes("Looking up");
+      });
+    };
+    await ap.goto(APP_URL, { waitUntil: "load" });
+
+    await lookUp(L4_WIN);
+    checks["L4 three translations"] = (await ap.locator("#compare .col").count()) === 3;
+    checks["L4 lost place honest"] = (await ap.textContent("#where")).includes("lost to history");
+
+    await lookUp(L4_LOCATED);
+    checks["L4 located has coordinates"] = /\d+\.\d+°[NS], \d+\.\d+°[EW]/.test(await ap.textContent("#where"));
+
+    await lookUp(L4_NOPLACES);
+    checks["L4 no-places honest"] = (await ap.textContent("#where")).includes("about an idea");
+
+    // Offline: the only hosts contacted are localhost (served page + Concord) — no CDN/fonts/tiles.
+    checks["L4 fully offline (localhost only)"] = [...hosts].every((h) => h === "localhost" || h === "127.0.0.1");
+
+    await ap.route(`${CONCORD}/**`, (r) => r.abort());
+    await lookUp(L4_WIN);
+    checks["L4 friendly is-it-running"] = (await ap.textContent("#compare")).includes("is it running");
+    await ap.close();
   } finally {
     await browser.close();
   }

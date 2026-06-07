@@ -14,10 +14,23 @@ const WIDTH = 760;
 const img1 = (name) => join(LESSONS, "01-is-it-on", "images", name);
 const img2 = (name) => join(LESSONS, "02-show-me-a-verse", "images", name);
 const img3 = (name) => join(LESSONS, "03-find-by-idea", "images", name);
+const img4 = (name) => join(LESSONS, "04-compare-and-where", "images", name);
 
 // Lesson 3 demo queries — must show a stark word-vs-meaning contrast in WEB (verified live).
 const HEADLINE_Q = "feeling alone and forgotten";
 const SECOND_Q = "being patient with difficult people";
+
+// Lesson 4 references (verified live on v1.0.2): a lost-place win, a located case, a no-places case.
+const L4_WIN = "Genesis 4:16";        // translations differ; Eden & Nod both honestly lost
+const L4_LOCATED = "Acts 17:22";      // Athens & Areopagus — real coordinates
+const L4_NOPLACES = "John 3:16";      // 0 places — about an idea
+
+// Lesson 4's two sections have both settled.
+const appSettled = () => {
+  const c = document.getElementById("compare").textContent;
+  const w = document.getElementById("where").textContent;
+  return c && w && !c.includes("Looking up") && !w.includes("Looking up");
+};
 
 // Both panes have settled (not mid-"Searching…") and have content.
 const panesSettled = () => {
@@ -94,6 +107,29 @@ async function main() {
   await p4.waitForFunction(panesSettled);
   await p4.screenshot({ path: img3("second-query.png"), fullPage: true });
   await ctx3.close();
+
+  // ---- Lesson 4: drive the real app.html (own context, clean cache) ----
+  const ctx4 = await browser.newContext({ viewport });
+  const aurl = `http://localhost:${PORT}/04-compare-and-where/app.html`;
+  const p5 = await ctx4.newPage();
+
+  await p5.goto(aurl, { waitUntil: "load" });
+  await p5.screenshot({ path: img4("on-load.png"), fullPage: true });
+
+  await p5.click("#go"); // the pre-filled win (Genesis 4:16): translations + two lost places
+  await p5.waitForFunction(appSettled);
+  await p5.screenshot({ path: img4("win.png"), fullPage: true });
+
+  await p5.fill("#ref", L4_LOCATED);
+  await p5.click("#go");
+  await p5.waitForFunction(appSettled);
+  await p5.screenshot({ path: img4("located.png"), fullPage: true });
+
+  await p5.fill("#ref", L4_NOPLACES);
+  await p5.click("#go");
+  await p5.waitForFunction(appSettled);
+  await p5.screenshot({ path: img4("no-places.png"), fullPage: true });
+  await ctx4.close();
 
   await browser.close();
   server.close();
