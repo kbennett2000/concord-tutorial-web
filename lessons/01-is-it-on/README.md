@@ -22,7 +22,8 @@ That blob of text that came back — the one with counts in it — wasn't a web 
 *data*, sent straight to you by Concord. Which means: **you just made your first API call.**
 
 If you skipped that check, open the address now and watch the counts come back. That's Concord
-telling you it's on, in its own language.
+telling you it's on, in its own language. (Nothing came back? See
+[When it won't connect](../../SETUP.md#when-it-wont-connect) — it's a quick fix.)
 
 ## Now ask it for a verse
 
