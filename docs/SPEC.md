@@ -605,6 +605,17 @@ Concord from source on a dev box** — no `docker build`, no compose build, espe
 `--no-cache`: a Concord build re-bakes the embedding model and can pin the machine (it did once,
 mid-T3). The published image exists precisely so no gate needs a local build.
 
+**Contract check (complements the rendering smoke).** The smoke asserts rendered DOM, so a `/v1`
+shape drift surfaces as a cryptic `L2 verse shows = false`. A companion `tools/screenshots/contract.mjs`
+(Node `fetch`, no browser) asserts the response **shapes** the lessons parse — directly against the
+same pinned v1.0.2 image — and names the field that moved. It covers each shape a lesson reads:
+`verses[].reference` / `.text` (translation-keyed, incl. the `?translations=` keys and the 2-verse
+range); `/v1/search` `total` + `hits[].reference`/`.snippet`; `/v1/semantic-search` `count` +
+`results[].reference`/`.score`/`.text`; and `/v1/verses/{ref}/places` `total` + `places[].status`/
+`.name` with **numeric** coords for `identified`/`disputed` and **null** coords for
+`unknown`/`symbolic`/`multiple` (the honesty model Lessons 4–5 depend on). CI runs it as its own step
+**before** the Playwright install, so drift fails in seconds without paying for the browser download.
+
 ## 9. Decisions (all resolved)
 
 Every open question from the first draft is resolved and folded into the spec above:
