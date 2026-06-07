@@ -111,9 +111,9 @@ and now shows it on a map. That's genuinely yours. Open it for someone.
 
 Where builders go next:
 
-- **Steal freely** — `recipes.md` has the paste-ready snippets from these lessons.
-- **Build something of your own** — `ideas.md` has starting points (a verse-of-the-day screen, a
-  sermon-prep sheet, a memory-verse quiz…).
+- **Steal freely** — [recipes.md](../../recipes.md) has the paste-ready snippets from these lessons.
+- **Build something of your own** — [ideas.md](../../ideas.md) has starting points (a verse-of-the-day
+  screen, a sermon-prep sheet, a memory-verse quiz…).
 - **Go deeper** — Concord's [`docs/API.md`](https://github.com/kbennett2000/concord/blob/main/docs/API.md)
   is the full menu of everything you can ask it.
 - **Tell us what you made.** Seriously — that's the best part.

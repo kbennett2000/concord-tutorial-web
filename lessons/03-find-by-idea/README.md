@@ -23,7 +23,7 @@ you typed) and a *meaning* search (verses about the idea, even in different word
 ![The search page with two columns. The left "By word" column says the exact words weren't found; the right "By meaning" column lists many verses about loneliness](images/contrast.png)
 
 Look at the difference. The **word** column came up empty — none of those exact words appear
-together in the text. That's *not* a bug; it's the whole point. The **meaning** column, mean­while,
+together in the text. That's *not* a bug; it's the whole point. The **meaning** column, meanwhile,
 is full of verses that are clearly about feeling alone and forgotten — Job's friends failing him,
 the psalmist crying *"I am forgotten… like a dead man"* — even though they never use your words.
 
