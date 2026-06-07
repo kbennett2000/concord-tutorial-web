@@ -1,13 +1,14 @@
 # concord-tutorial-web — Build Spec
 
-> Status: **all five lessons are built and verified — the course is complete end to end.** The
-> front door (README, SETUP.md, CLAUDE.md) and Lessons 1–5 have shipped (T0–T5), each its own PR;
-> what remains is the two freebies (T6), the branding/graduation polish (T7), and a CI slice (§8).
-> This document is the blueprint cc builds against; it lives at `docs/SPEC.md` in the repo. Same
-> spec-first, PR-per-slice discipline as Concord; Kris merges after review.
+> Status: **complete.** The whole build shipped across twenty reviewed PRs — the front door (T0),
+> all five lessons (T1–T5), the two freebies (T6), the branding/polish pass (T7), and a CI slice
+> that runs the smoke on every push and PR. The five-lesson course is now under **three-engine
+> regression protection** (§8.1). This document is the design-of-record the build was built against;
+> it lives at `docs/SPEC.md` and is now a record of a finished project. Same spec-first, PR-per-slice
+> discipline as Concord; Kris merged each slice after review.
 >
-> **Synced through T5** (all lesson slices T0–T5 and their sub-slices) and the Concord CORS fix.
-> What's recorded below since the prior sync: a new lead rule heads §5.1 — the umbrella *"write for
+> **Synced through the full build** (T0–T7 plus the CI slice) and the Concord CORS fix. What's
+> recorded below: a new lead rule heads §5.1 — the umbrella *"write for
 > one real reader"* — with the others recast as instances of it (§5.1); a real Concord
 > cache-poisoning bug found during T2c was **fixed at the root in Concord v1.0.2** (§3.2.1), which
 > the course pins to; Lesson 5 adds the one dependency (Leaflet 1.9.4) and teaches the offline→online
@@ -572,8 +573,9 @@ offline capstone `app.html`; **T5** the map `app-map.html` (Leaflet 1.9.4, the o
 tradeoff). Each was built *working-first from the start*, gated on Chromium + Firefox against the
 **pulled v1.0.2** image (§8.1), and carries committed screenshots (§5.2). The umbrella rule (§5.1)
 landed in slice **T2e** alongside a Lesson-2 error-state fix (removing a "Stop Concord and try again"
-step that asked the reader to break things). Remaining: **T6** (freebies), **T7** (branding /
-graduation polish), and the **CI slice** that closes the WebKit gap.
+step that asked the reader to break things). **T6** (the two freebies) and **T7** (the branding/polish
+pass) then shipped; the **CI slice** (below) shipped last and now runs the smoke on every push and PR —
+closing the WebKit gap for good. The build is complete.
 
 ### 8.1 Cross-cutting verification gate (folded into T2)
 
@@ -588,12 +590,13 @@ the same way.) Record the result in the PR; add a one-line note to `SETUP.md` on
 needs a caveat the reader must know. If any browser surprises us, it's caught here — on one page —
 not after five lessons assume it.
 
-**Status (honest), across all five lessons.** Every lesson's gate ran green on **Chromium +
-Firefox** against live Concord (18/18 checks at Lesson 5). WebKit stayed *tool-ready, not yet run*
-throughout: the build host (Ubuntu 26.04) can't install WebKit's system libs, but the committed
-`tools/screenshots/smoke.mjs` runs it on a capable host, and the **CI slice** (§8) closes the gap
-durably (Playwright's CI setup installs WebKit cleanly). So the gate is **two engines verified,
-three tool-covered** — not overclaimed as three. Lesson 5 deliberately drops Lesson 4's
+**Status (honest), now three engines verified.** Through the local build, every lesson's gate ran
+green on **Chromium + Firefox** (18/18 at Lesson 5), with WebKit *tool-ready but unrun* — the build
+host (Ubuntu 26.04) can't install WebKit's system libs. The **CI slice** (§8) closed that gap: a
+GitHub-hosted runner installs WebKit cleanly, so `tools/screenshots/smoke.mjs` now runs all three
+engines on every push and PR. On its first execution WebKit passed **18/18**, identical to the others —
+no engine-specific issue surfaced. So the gate is genuinely **three engines verified (Chromium +
+Firefox + WebKit), via CI** — no longer rounded up from two. Lesson 5 deliberately drops Lesson 4's
 localhost-only assertion (its external tiles are the point) and asserts the map and pins render.
 
 **Concord for the gate: pull, never build.** Gates run against the published image
@@ -617,8 +620,9 @@ Every open question from the first draft is resolved and folded into the spec ab
   contract. ✅ (§0, §3.2.1)
 - **Start fork** — **(a) lock-then-build**, chosen; the build has run T0 → T2 (plus refinement
   sub-slices) this way, one PR per slice, Kris merging. ✅
-- **WebKit/Safari verification** — a **named CI slice** (§8) closes it durably; until it lands, the
-  gate is honestly Chrome + Firefox verified, WebKit tool-covered (§8.1). ✅ (scheduled)
+- **WebKit/Safari verification** — the **CI slice** (§8) shipped and runs all three engines on every
+  push and PR; WebKit passed 18/18 on first execution, so the gate is genuinely three-engine verified
+  (§8.1). ✅
 
 Nothing here is open; the build proceeds slice-by-slice per §8 — **T3 next**.
 
