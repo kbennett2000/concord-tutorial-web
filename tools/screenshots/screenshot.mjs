@@ -13,6 +13,18 @@ const WIDTH = 760;
 
 const img1 = (name) => join(LESSONS, "01-is-it-on", "images", name);
 const img2 = (name) => join(LESSONS, "02-show-me-a-verse", "images", name);
+const img3 = (name) => join(LESSONS, "03-find-by-idea", "images", name);
+
+// Lesson 3 demo queries — must show a stark word-vs-meaning contrast in WEB (verified live).
+const HEADLINE_Q = "feeling alone and forgotten";
+const SECOND_Q = "being patient with difficult people";
+
+// Both panes have settled (not mid-"Searching…") and have content.
+const panesSettled = () => {
+  const k = document.getElementById("keyword").textContent;
+  const m = document.getElementById("meaning").textContent;
+  return k.length > 0 && m.length > 0 && !k.includes("Searching") && !m.includes("Searching");
+};
 
 async function main() {
   const server = await startServer(LESSONS, PORT);
@@ -65,9 +77,27 @@ async function main() {
   await p3.screenshot({ path: img2("concord-unreachable.png"), fullPage: true });
   await p3.close();
 
+  // ---- Lesson 3: drive the real search.html (own context, clean cache) ----
+  const ctx3 = await browser.newContext({ viewport });
+  const surl = `http://localhost:${PORT}/03-find-by-idea/search.html`;
+  const p4 = await ctx3.newPage();
+
+  await p4.goto(surl, { waitUntil: "load" });
+  await p4.screenshot({ path: img3("on-load.png"), fullPage: true });
+
+  await p4.click("#go"); // searches the pre-filled headline query
+  await p4.waitForFunction(panesSettled);
+  await p4.screenshot({ path: img3("contrast.png"), fullPage: true });
+
+  await p4.fill("#q", SECOND_Q);
+  await p4.click("#go");
+  await p4.waitForFunction(panesSettled);
+  await p4.screenshot({ path: img3("second-query.png"), fullPage: true });
+  await ctx3.close();
+
   await browser.close();
   server.close();
-  console.log("Saved 7 screenshots to lessons/*/images/");
+  console.log("Saved screenshots to lessons/*/images/");
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
