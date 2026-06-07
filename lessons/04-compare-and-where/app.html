@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compare, and where did it happen?</title>
+  <style>
+    /* Everything is here in one file — no fonts, no libraries, nothing from the internet. */
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      max-width: 62rem; margin: 2rem auto; padding: 0 1rem;
+      line-height: 1.5; color: #1c2733; background: #faf7f0;
+    }
+    h1 { font-size: 1.4rem; color: #2A4A6B; }
+    h2 { font-size: 1.05rem; color: #2A4A6B; margin: 1.5rem 0 .5rem; }
+    .row { display: flex; gap: .5rem; margin: 1.25rem 0; }
+    input {
+      flex: 1; padding: .5rem .6rem; font-size: 1rem;
+      border: 1px solid #c9bfa8; border-radius: .4rem;
+    }
+    button {
+      padding: .5rem .9rem; font-size: 1rem; cursor: pointer;
+      border: 0; border-radius: .4rem; background: #2A4A6B; color: #fff;
+    }
+    /* Three translations side by side; they stack on a narrow screen. */
+    .columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    @media (max-width: 44rem) { .columns { grid-template-columns: 1fr; } }
+    .col { background: #fff; border: 1px solid #ece3cf; border-radius: .5rem; padding: .75rem 1rem; }
+    .col h3 { margin: 0 0 .4rem; font-size: .9rem; letter-spacing: .04em; color: #2A4A6B; text-transform: uppercase; }
+    .missing { color: #94855f; font-style: italic; }
+    .place { background: #fff; border: 1px solid #ece3cf; border-radius: .5rem; padding: .6rem .9rem; margin: .5rem 0; }
+    .place .name { font-weight: 600; color: #2A4A6B; }
+    .located { color: #4A6B3C; }      /* a place we can put on the map */
+    .lost { color: #9a6a3c; }          /* honestly unknown — no invented spot */
+    .note { color: #6b5b40; }
+    .message { background: #fbeee0; border: 1px solid #e7cda8; border-radius: .4rem; padding: .6rem .9rem; }
+    .message small { display: block; margin-top: .35rem; color: #6b5b40; }
+  </style>
+</head>
+<body>
+  <h1>Compare, and where did it happen?</h1>
+  <p>Type a reference. You'll see it in three translations side by side, and the places it names —
+     each shown honestly.</p>
+
+  <div class="row">
+    <input id="ref" value="Genesis 4:16" aria-label="Bible reference">
+    <button id="go">Look it up</button>
+  </div>
+
+  <h2>Compare</h2>
+  <div id="compare"></div>
+
+  <h2>Where it happened</h2>
+  <div id="where"></div>
+
+  <script>
+    // Where Concord lives. Change this only if Concord runs on another computer.
+    const CONCORD = "http://localhost:8000";
+
+    // The three translations we line up: an old one, a modern one, and one in between.
+    const TRANSLATIONS = ["KJV", "WEB", "ASV"];
+
+    const input = document.getElementById("ref");
+    const compareEl = document.getElementById("compare");
+    const whereEl = document.getElementById("where");
+
+    // A calm, human message instead of a blank section or a raw error.
+    function message(el, text, hint) {
+      el.innerHTML = "";
+      const box = document.createElement("div");
+      box.className = "message";
+      box.textContent = text;
+      if (hint) {
+        const small = document.createElement("small");
+        small.textContent = hint;
+        box.appendChild(small);
+      }
+      el.appendChild(box);
+    }
+
+    // Concord sends "[verse not included…]" (or, rarely, null) when a translation omits a verse.
+    function isMissing(text) {
+      return text === null || text === undefined || text === "[verse not included in this translation]";
+    }
+
+    // Turn 37.97 / 23.73 into "37.97°N, 23.73°E" — readable, and never reversible by accident.
+    function coords(lat, lon) {
+      const ns = lat >= 0 ? "N" : "S", ew = lon >= 0 ? "E" : "W";
+      return `${Math.abs(lat).toFixed(2)}°${ns}, ${Math.abs(lon).toFixed(2)}°${ew}`;
+    }
+
+    // ---- Compare: the same verse in three translations (one call) ----
+    async function renderCompare(ref) {
+      compareEl.innerHTML = "<p class='note'>Looking up…</p>";
+      let res;
+      try {
+        res = await fetch(`${CONCORD}/v1/verses/${encodeURIComponent(ref)}?translations=${TRANSLATIONS.join(",")}`);
+      } catch (e) {
+        return message(compareEl, "Couldn't reach Concord — is it running?",
+                       "Check " + CONCORD + "/healthz in your browser.");
+      }
+      const data = await res.json();
+      if (!res.ok) {
+        const said = data.error && data.error.message ? "Concord said: " + data.error.message : "";
+        return message(compareEl, "Hmm — couldn't find that. Try something like Genesis 4:16.", said);
+      }
+      compareEl.innerHTML = "";
+      for (const v of data.verses) {
+        const ref3 = document.createElement("p");
+        ref3.className = "note";
+        ref3.textContent = v.reference;
+        compareEl.appendChild(ref3);
+
+        const cols = document.createElement("div");
+        cols.className = "columns";
+        for (const t of TRANSLATIONS) {
+          const col = document.createElement("div");
+          col.className = "col";
+          const h3 = document.createElement("h3");
+          h3.textContent = t;
+          const body = document.createElement("div");
+          if (isMissing(v.text[t])) {
+            body.className = "missing";
+            body.textContent = "(this translation doesn't include this verse)";
+          } else {
+            body.textContent = v.text[t];
+          }
+          col.appendChild(h3);
+          col.appendChild(body);
+          cols.appendChild(col);
+        }
+        compareEl.appendChild(cols);
+      }
+    }
+
+    // ---- Where: the places the passage names, each shown honestly (the other call) ----
+    function describePlace(p) {
+      // identified / disputed have real coordinates; the rest are honestly without one.
+      if (p.status === "identified") {
+        return { cls: "located", text: `${coords(p.latitude, p.longitude)} — we know roughly where this was.` };
+      }
+      if (p.status === "disputed") {
+        return { cls: "located", text: `${coords(p.latitude, p.longitude)} (disputed — scholars place it differently; this is a best guess).` };
+      }
+      if (p.status === "unknown") {
+        return { cls: "lost", text: "Location lost to history — Concord doesn't invent a spot for it." };
+      }
+      if (p.status === "symbolic") {
+        return { cls: "lost", text: "A figurative name, not a physical place." };
+      }
+      return { cls: "lost", text: "Refers to several places, so there's no single spot to show." };
+    }
+
+    async function renderWhere(ref) {
+      whereEl.innerHTML = "<p class='note'>Looking up…</p>";
+      let res;
+      try {
+        res = await fetch(`${CONCORD}/v1/verses/${encodeURIComponent(ref)}/places`);
+      } catch (e) {
+        return message(whereEl, "Couldn't reach Concord — is it running?",
+                       "Check " + CONCORD + "/healthz in your browser.");
+      }
+      const data = await res.json();
+      if (!res.ok) {
+        const said = data.error && data.error.message ? "Concord said: " + data.error.message : "";
+        return message(whereEl, "Hmm — couldn't find that. Try something like Genesis 4:16.", said);
+      }
+      // No places isn't a failure — it's the honest truth about this verse.
+      if (data.total === 0) {
+        whereEl.innerHTML = "<p class='note'>No places are named here — this verse is about an idea, not a location.</p>";
+        return;
+      }
+      whereEl.innerHTML = "";
+      for (const p of data.places) {
+        const { cls, text } = describePlace(p);
+        const box = document.createElement("div");
+        box.className = "place";
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = p.type ? `${p.name} (${p.type})` : p.name;
+        const where = document.createElement("div");
+        where.className = cls;
+        where.textContent = text;
+        box.appendChild(name);
+        box.appendChild(where);
+        whereEl.appendChild(box);
+      }
+    }
+
+    // One reference, two questions, one page — that's the whole idea of this lesson.
+    function lookUp() {
+      const ref = input.value.trim();
+      if (!ref) return;
+      renderCompare(ref);
+      renderWhere(ref);
+    }
+
+    document.getElementById("go").addEventListener("click", lookUp);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") lookUp(); });
+  </script>
+</body>
+</html>
