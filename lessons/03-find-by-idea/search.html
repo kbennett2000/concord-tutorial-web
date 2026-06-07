@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find verses by idea</title>
+  <style>
+    /* Just enough styling to read clearly. The code is the lesson. */
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      max-width: 60rem; margin: 2rem auto; padding: 0 1rem;
+      line-height: 1.5; color: #1c2733; background: #faf7f0;
+    }
+    h1 { font-size: 1.4rem; color: #2A4A6B; }
+    .row { display: flex; gap: .5rem; margin: 1.25rem 0; }
+    input {
+      flex: 1; padding: .5rem .6rem; font-size: 1rem;
+      border: 1px solid #c9bfa8; border-radius: .4rem;
+    }
+    button {
+      padding: .5rem .9rem; font-size: 1rem; cursor: pointer;
+      border: 0; border-radius: .4rem; background: #2A4A6B; color: #fff;
+    }
+    /* Two panes side by side; they stack on a narrow screen. */
+    .panes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 40rem) { .panes { grid-template-columns: 1fr; } }
+    .pane { background: #fff; border: 1px solid #ece3cf; border-radius: .5rem; padding: .75rem 1rem; }
+    .pane h2 { font-size: 1rem; color: #2A4A6B; margin: 0 0 .25rem; }
+    .pane .sub { font-size: .8rem; color: #6b5b40; margin: 0 0 .75rem; }
+    .hit { padding: .5rem 0; border-top: 1px solid #f0ead9; }
+    .hit:first-of-type { border-top: 0; }
+    .ref { font-weight: 600; color: #2A4A6B; }
+    .score { float: right; font-weight: 400; font-size: .8rem; color: #94855f; }
+    mark { background: #fbe7b0; padding: 0 .1em; border-radius: .15em; }
+    .note { color: #6b5b40; }
+    .message { background: #fbeee0; border: 1px solid #e7cda8; border-radius: .4rem; padding: .6rem .8rem; }
+    .message small { display: block; margin-top: .35rem; color: #6b5b40; }
+  </style>
+</head>
+<body>
+  <h1>Find verses by idea</h1>
+  <p>Type something you're looking for, then see what <em>word</em> search and <em>meaning</em>
+     search each bring back.</p>
+
+  <div class="row">
+    <input id="q" value="feeling alone and forgotten" aria-label="What to search for">
+    <button id="go">Search</button>
+  </div>
+
+  <div class="panes">
+    <div class="pane">
+      <h2>By word</h2>
+      <p class="sub">Finds verses that contain the words you typed.</p>
+      <div id="keyword"></div>
+    </div>
+    <div class="pane">
+      <h2>By meaning</h2>
+      <p class="sub">Finds verses about the idea — even if they use different words.</p>
+      <div id="meaning"></div>
+    </div>
+  </div>
+
+  <script>
+    // Where Concord lives. Change this only if Concord runs on another computer.
+    const CONCORD = "http://localhost:8000";
+
+    const input = document.getElementById("q");
+    const keywordPane = document.getElementById("keyword");
+    const meaningPane = document.getElementById("meaning");
+
+    // A friendly, human message instead of a blank pane or a raw error.
+    function message(pane, text, hint) {
+      pane.innerHTML = "";
+      const box = document.createElement("div");
+      box.className = "message";
+      box.textContent = text;
+      if (hint) {
+        const small = document.createElement("small");
+        small.innerHTML = hint;   // hint may contain a link we built ourselves — trusted
+        box.appendChild(small);
+      }
+      pane.appendChild(box);
+    }
+
+    // One result row: a reference, then either a snippet (keyword) or plain text (meaning).
+    function row(reference, html, score) {
+      const div = document.createElement("div");
+      div.className = "hit";
+      const ref = document.createElement("div");
+      ref.className = "ref";
+      ref.textContent = reference;
+      if (score !== undefined) {
+        const s = document.createElement("span");
+        s.className = "score";
+        s.textContent = "similarity " + score.toFixed(2);
+        ref.appendChild(s);
+      }
+      const body = document.createElement("div");
+      body.innerHTML = html;   // see callers: keyword passes Concord's trusted <mark> snippet
+      div.appendChild(ref);
+      div.appendChild(body);
+      return div;
+    }
+
+    // Escape user/verse text before putting it in innerHTML (the meaning pane has no markup).
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    // ---- By word: /v1/search (exact words; snippet wraps matches in <mark>) ----
+    async function runKeyword(q) {
+      keywordPane.innerHTML = "<p class='note'>Searching…</p>";
+      let res;
+      try {
+        res = await fetch(`${CONCORD}/v1/search?q=${encodeURIComponent(q)}&translation=WEB`);
+      } catch (e) {
+        return message(keywordPane, "Couldn't reach Concord — is it running?",
+                       "Check " + CONCORD + "/healthz in your browser.");
+      }
+      const data = await res.json();
+      if (!res.ok) {
+        const said = data.error && data.error.message ? "Concord said: " + escapeHtml(data.error.message) : "";
+        return message(keywordPane, "That search didn't go through.", said);
+      }
+      // An empty word-search is the whole point of this lesson, not a failure.
+      if (data.total === 0) {
+        keywordPane.innerHTML =
+          "<p class='note'>Those exact words don't appear in the text, so word-search comes up " +
+          "empty — but look what meaning-search found. →</p>";
+        return;
+      }
+      keywordPane.innerHTML = "";
+      for (const h of data.hits) {
+        // h.snippet is markup Concord built (it wraps matches in <mark>) — safe to render as HTML.
+        keywordPane.appendChild(row(h.reference, h.snippet));
+      }
+    }
+
+    // ---- By meaning: /v1/semantic-search (by idea; ranked by closeness) ----
+    async function runMeaning(q) {
+      meaningPane.innerHTML = "<p class='note'>Searching…</p>";
+      let res;
+      try {
+        res = await fetch(`${CONCORD}/v1/semantic-search?q=${encodeURIComponent(q)}&translation=WEB`);
+      } catch (e) {
+        return message(meaningPane, "Couldn't reach Concord — is it running?",
+                       "Check " + CONCORD + "/healthz in your browser.");
+      }
+      // Meaning search is on by default, but a Concord can switch it off — say so kindly if so.
+      if (res.status === 503) {
+        return message(meaningPane, "Meaning search isn't switched on for this Concord (it's on by default).",
+          "See Concord's <a href='https://github.com/kbennett2000/concord#configuration'>configuration docs</a>.");
+      }
+      const data = await res.json();
+      if (!res.ok) {
+        const said = data.error && data.error.message ? "Concord said: " + escapeHtml(data.error.message) : "";
+        return message(meaningPane, "That search didn't go through.", said);
+      }
+      if (data.count === 0) {
+        meaningPane.innerHTML = "<p class='note'>No matches.</p>";
+        return;
+      }
+      meaningPane.innerHTML = "";
+      for (const r of data.results) {
+        const text = r.text ? escapeHtml(r.text) : "<span class='note'>(not in WEB)</span>";
+        meaningPane.appendChild(row(r.reference, text, r.score));
+      }
+    }
+
+    // One button, one Enter key — both searches fire together, each filling its own pane.
+    function search() {
+      const q = input.value.trim();
+      if (!q) return;
+      runKeyword(q);
+      runMeaning(q);
+    }
+
+    document.getElementById("go").addEventListener("click", search);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") search(); });
+  </script>
+</body>
+</html>
