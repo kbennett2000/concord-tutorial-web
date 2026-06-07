@@ -33,6 +33,17 @@ The first of the promised `concord-tutorial-*` series. Proof the surface carries
 - Match Concord's documentation voice (warm, precise, honest about limits) so the two repos feel
   like one family.
 
+**Write for one real reader — and run every line past them.** Picture a specific person: curious,
+non-technical, has never written a line of code, one frustration away from closing the tab. Before
+anything ships, hold each sentence and each step up to them and ask three questions — *Would they
+know what this means? Would they know how to do it? Would they see why they're doing it?* Any "no"
+means cut it, explain it, or move it. Every rule below is an instance of this one. The sharpest
+instance: **never ask the reader to perform an action whose only purpose is to exercise the code** —
+stopping a server, deliberately breaking something, forcing an error. That is the builder's job,
+already done for them. The reader only ever does what a real user of the finished app would do
+naturally (type a verse, fat-finger a typo); they meet the error states through *reassurance* —
+"if you ever see this, here's what it means" — never by being told to cause them.
+
 **Formatting — break the wall (a scannable page is itself reassurance).** For this
 reader, a page that *looks* easy signals "you can do this"; a dense block signals
 "this is hard." In every README and lesson:
@@ -152,6 +163,12 @@ end (a real verse appears; both search panes populate; places render honestly; t
 located places and lists the unknown ones). Honor the **no-broken-ending** rule — a lesson that
 doesn't run is not done. At **T2**, verify the served-page path on Chrome and Firefox against a
 live Concord (SPEC §8.1) before later lessons lean on it.
+
+**Read it back as the reader, not the author.** Before opening the PR, walk the lesson top to
+bottom as that nervous first-timer following it literally — not as its writer confirming the code
+works. Every noun explained or obvious; every step has a how and a why they'd accept; nothing asks
+them to break, stop, inventory, or pre-learn anything. If you wouldn't follow it comfortably with
+zero coding background, fix it before the PR.
 
 ## Taste & restraint
 
