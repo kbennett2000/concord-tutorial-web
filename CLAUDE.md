@@ -13,7 +13,7 @@ A **beginner-first, five-lesson course** that teaches someone who has never writ
 build a real web app on top of a **running Concord**. The learner is the audience; Concord is
 the vehicle — this repo serves the learner, not the API. It assumes Concord is already running
 and points to Concord's existing install/deploy docs if it isn't. It pins to Concord's **`/v1`**
-surface and **v1.0.0**, and **never edits the main Concord repo**.
+surface and **v1.0.2**, and **never edits the main Concord repo**.
 
 The first of the promised `concord-tutorial-*` series. Proof the surface carries real apps:
 **songbird** already runs on these endpoints.
