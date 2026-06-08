@@ -111,6 +111,11 @@ and now shows it on a map. That's genuinely yours. Open it for someone.
 
 Where builders go next:
 
+- **Keep going — there's a whole next course.** You built this in plain HTML and JavaScript.
+  **[concord-tutorial-react](https://github.com/kbennett2000/concord-tutorial-react)** takes it from
+  here and walks you into React, one idea at a time — ending with you opening the source of a real,
+  full-size app (songbird) and finding you can *read* it. If this course felt good, that's exactly
+  where to go next.
 - **Steal freely** — [recipes.md](../../recipes.md) has the paste-ready snippets from these lessons.
 - **Build something of your own** — [ideas.md](../../ideas.md) has starting points (a verse-of-the-day
   screen, a sermon-prep sheet, a memory-verse quiz…).

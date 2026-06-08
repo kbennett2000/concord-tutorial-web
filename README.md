@@ -42,6 +42,10 @@ Start with [Lesson 1](lessons/01-is-it-on/) — it takes about two minutes, with
 What's ahead, one small win at a time: a quick verse fetcher, search by meaning, a
 translation-comparer, and — if you want it — a map.
 
+And when you've finished all five, there's a next course when you're ready:
+**[concord-tutorial-react](https://github.com/kbennett2000/concord-tutorial-react)** picks up right
+where this one ends and walks you into React — finishing with you reading a real app's source.
+
 ## License
 
 MIT © 2026 Kris Bennett — see [`LICENSE`](LICENSE). (Parity with Concord.)
